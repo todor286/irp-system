@@ -599,6 +599,7 @@
             <div class="quick-action-buttons">
                 <button class="btn-success" id="markAsResolved">Маркирай като разрешен</button>
                 <button class="btn-warning" id="markAsClosed">Маркирай като приключен</button>
+                <button class="btn-info" id="viewDetails">Виж пълни детайли</button>
             </div>
         </div>
     </div>
@@ -836,15 +837,9 @@
             const incident = incidents.find(i => i.id === selectedIncidentId);
             if (!incident) return;
             
-            const qrData = JSON.stringify({
-                id: incident.id,
-                title: incident.title,
-                description: incident.description,
-                status: incident.status,
-                priority: incident.priority,
-                reporter: incident.reporter,
-                date: incident.date
-            });
+            // Създаваме URL адрес, който директно сочи към този сайт със специален параметър
+            const siteUrl = window.location.href.split('?')[0]; // Вземаме текущия URL без параметри
+            const qrData = `${siteUrl}?scan=true&incident=${incident.id}`;
             
             // Генериране на QR код
             const qrContainer = document.getElementById('qrcode');
@@ -1160,7 +1155,7 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Статус:</span>
-                    <span class="detail-value">${getStatusText(incident.status)}</span>
+                    <span class="detail-value status-badge status-${incident.status}">${getStatusText(incident.status)}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Дата:</span>
@@ -1175,12 +1170,22 @@
                 (incident.status === 'resolved') ? 'inline-block' : 'none';
             
             modal.style.display = 'flex';
+            addLogEntry(`Отворен е модал за сканиран инцидент #${incident.id}`);
         }
         
         // Функция за затваряне на модала за сканиран инцидент
         function closeScannedModal() {
             document.getElementById('scannedIncidentModal').style.display = 'none';
             currentScannedIncident = null;
+            addLogEntry('Модалът за сканиран инцидент е затворен');
+        }
+        
+        // Функция за преглед на пълни детайли
+        function viewFullDetails() {
+            if (currentScannedIncident) {
+                selectIncident(currentScannedIncident.id);
+                closeScannedModal();
+            }
         }
         
         // Симулация на сканиране на QR код
@@ -1225,6 +1230,25 @@
             startBtn.style.display = 'inline-block';
             stopBtn.style.display = 'none';
             scanResult.innerHTML = '';
+        }
+        
+        // Функция за проверка на URL параметри при зареждане на страницата
+        function checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const scanParam = urlParams.get('scan');
+            const incidentId = urlParams.get('incident');
+            
+            if (scanParam === 'true' && incidentId) {
+                const incident = incidents.find(i => i.id == incidentId);
+                if (incident) {
+                    // Премахваме параметрите от URL адреса
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    
+                    // Показваме модала със сканирания инцидент
+                    showScannedIncident(incident);
+                    addLogEntry(`Автоматично отворен модал за инцидент #${incident.id} от URL параметър`);
+                }
+            }
         }
         
         // Обработка на подаването на формуляра
@@ -1275,6 +1299,7 @@
                 updateStatus(currentScannedIncident.id, 'closed');
             }
         });
+        document.getElementById('viewDetails').addEventListener('click', viewFullDetails);
         
         // Затваряне на модала при клик извън него
         window.addEventListener('click', function(event) {
@@ -1288,6 +1313,7 @@
         updateStats();
         displayIncidents();
         updateLogDisplay();
+        checkUrlParameters(); // Проверяваме за URL параметри при зареждане
         addLogEntry('Системата е стартирана');
     </script>
 </body>
