@@ -448,6 +448,54 @@
             margin-right: 10px;
         }
         
+        .mobile-view {
+            display: none;
+            padding: 20px;
+        }
+        
+        .mobile-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .mobile-incident-info {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-status-form {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            display: none;
+        }
+        
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -482,196 +530,204 @@
                 min-width: 120px;
             }
         }
+        
+        @media (max-width: 767px) {
+            .desktop-view {
+                display: none;
+            }
+            
+            .mobile-view {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>IRP Система - Инцидентно Отчитане</h1>
-        
-        <div class="main-content">
-            <div class="left-column">
-                <div class="card">
-                    <h2>Докладвай нов инцидент</h2>
-                    <form id="incidentForm">
-                        <div class="form-group">
-                            <label for="title">Заглавие на инцидента</label>
-                            <input type="text" id="title" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="description">Описание</label>
-                            <textarea id="description" required></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="reporter">Докладчик</label>
-                            <input type="text" id="reporter" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="priority">Приоритет</label>
-                            <select id="priority">
-                                <option value="low">Нисък</option>
-                                <option value="medium">Среден</option>
-                                <option value="high">Висок</option>
-                                <option value="critical">Критичен</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit">Докладвай инцидент</button>
-                    </form>
-                </div>
-                
-                <div class="card">
-                    <h2>QR код за инцидент</h2>
-                    <div class="qr-section" id="qrSection">
-                        <p id="qrMessage">Изберете инцидент от списъка и генерирайте QR код за него</p>
-                        
-                        <div id="selectedIncidentInfo" class="selected-incident-info" style="display: none;">
-                            <strong>Избран инцидент:</strong>
-                            <div id="selectedIncidentDetails"></div>
-                        </div>
-                        
-                        <div class="qr-actions">
-                            <button id="generateQR" class="btn-success" style="display: none;">Генерирай QR код</button>
-                        </div>
-                        
-                        <div class="qr-code-container" id="qrCodeContainer" style="display: none;">
-                            <div id="qrcode"></div>
-                        </div>
-                        
-                        <div class="qr-actions" id="qrActionButtons" style="display: none;">
-                            <button id="downloadQR" class="btn-success">Свали QR кода</button>
-                            <button id="printQR" class="btn-warning">Принтирай QR кода</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h2>Сканиране на QR код</h2>
-                    <div class="scan-section">
-                        <p>Сканирайте QR код на инцидент за бърз достъп и промяна на статус</p>
-                        <div class="camera-container">
-                            <div id="camera-preview">
-                                <p>Камерата ще се активира при натискане на бутона</p>
-                            </div>
-                            <button id="startCamera" class="btn-success">Стартирай сканиране</button>
-                            <button id="stopCamera" class="btn-danger" style="display: none;">Спри сканирането</button>
-                        </div>
-                        <div id="scanResult"></div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h2>Статистика</h2>
-                    <div class="stats-grid" id="stats">
-                        <div class="stat-item">
-                            <div>Общо</div>
-                            <div class="stat-value" id="total-incidents">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div>Нови</div>
-                            <div class="stat-value" id="new-incidents">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div>В процес</div>
-                            <div class="stat-value" id="in-progress-incidents">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div>Разрешени</div>
-                            <div class="stat-value" id="resolved-incidents">0</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h2>Управление на данни</h2>
-                    <div class="data-management">
-                        <div class="data-actions">
-                            <button id="exportData" class="btn-info">Експортирай данни</button>
-                            <button id="importData" class="btn-info">Импортирай данни</button>
-                            <button id="clearData" class="btn-danger">Изтрий всички данни</button>
-                        </div>
-                        <div class="log-section">
-                            <h3>Системен лог</h3>
-                            <div id="systemLog"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Desktop View -->
+    <div class="desktop-view">
+        <div class="container">
+            <h1>IRP Система - Инцидентно Отчитане</h1>
             
-            <div class="right-column">
-                <div class="card">
-                    <h2>Списък с инциденти</h2>
-                    
-                    <div class="filters">
-                        <button class="filter-btn active" data-filter="all">Всички</button>
-                        <button class="filter-btn" data-filter="new">Нови</button>
-                        <button class="filter-btn" data-filter="in-progress">В процес</button>
-                        <button class="filter-btn" data-filter="resolved">Разрешени</button>
-                        <button class="filter-btn" data-filter="closed">Приключени</button>
+            <div class="main-content">
+                <div class="left-column">
+                    <div class="card">
+                        <h2>Докладвай нов инцидент</h2>
+                        <form id="incidentForm">
+                            <div class="form-group">
+                                <label for="title">Заглавие на инцидента</label>
+                                <input type="text" id="title" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="description">Описание</label>
+                                <textarea id="description" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reporter">Докладчик</label>
+                                <input type="text" id="reporter" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="priority">Приоритет</label>
+                                <select id="priority">
+                                    <option value="low">Нисък</option>
+                                    <option value="medium">Среден</option>
+                                    <option value="high">Висок</option>
+                                    <option value="critical">Критичен</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit">Докладвай инцидент</button>
+                        </form>
                     </div>
                     
-                    <div class="incident-list" id="incidentList">
-                        <div class="no-incidents">Все още няма докладвани инциденти</div>
+                    <div class="card">
+                        <h2>QR код за инцидент</h2>
+                        <div class="qr-section" id="qrSection">
+                            <p id="qrMessage">Изберете инцидент от списъка и генерирайте QR код за него</p>
+                            
+                            <div id="selectedIncidentInfo" class="selected-incident-info" style="display: none;">
+                                <strong>Избран инцидент:</strong>
+                                <div id="selectedIncidentDetails"></div>
+                            </div>
+                            
+                            <div class="qr-actions">
+                                <button id="generateQR" class="btn-success" style="display: none;">Генерирай QR код</button>
+                            </div>
+                            
+                            <div class="qr-code-container" id="qrCodeContainer" style="display: none;">
+                                <div id="qrcode"></div>
+                            </div>
+                            
+                            <div class="qr-actions" id="qrActionButtons" style="display: none;">
+                                <button id="downloadQR" class="btn-success">Свали QR кода</button>
+                                <button id="printQR" class="btn-warning">Принтирай QR кода</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>Сканиране на QR код</h2>
+                        <div class="scan-section">
+                            <p>Сканирайте QR код на инцидент за бърз достъп и промяна на статус</p>
+                            <div class="camera-container">
+                                <div id="camera-preview">
+                                    <p>Използвайте QR скенер на телефона</p>
+                                </div>
+                            </div>
+                            <p><strong>Инструкции:</strong></p>
+                            <ol style="text-align: left; margin-top: 10px;">
+                                <li>Генерирайте QR код за инцидент</li>
+                                <li>Сканирайте QR кода с телефона</li>
+                                <li>Променете статуса на инцидента</li>
+                                <li>Данните ще се актуализират автоматично</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>Статистика</h2>
+                        <div class="stats-grid" id="stats">
+                            <div class="stat-item">
+                                <div>Общо</div>
+                                <div class="stat-value" id="total-incidents">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Нови</div>
+                                <div class="stat-value" id="new-incidents">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>В процес</div>
+                                <div class="stat-value" id="in-progress-incidents">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Разрешени</div>
+                                <div class="stat-value" id="resolved-incidents">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>Управление на данни</h2>
+                        <div class="data-management">
+                            <div class="data-actions">
+                                <button id="exportData" class="btn-info">Експортирай данни</button>
+                                <button id="importData" class="btn-info">Импортирай данни</button>
+                                <button id="clearData" class="btn-danger">Изтрий всички данни</button>
+                            </div>
+                            <div class="log-section">
+                                <h3>Системен лог</h3>
+                                <div id="systemLog"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="card">
-                    <h2>Отчети</h2>
-                    <div class="report-section">
-                        <p>Генериране на отчети за инциденти</p>
-                        <div class="report-actions">
-                            <button id="generateReport" class="btn-success">Генерирай отчет</button>
-                            <button id="downloadReport" class="btn-info">Свали отчет</button>
-                            <button id="printReport" class="btn-warning">Принтирай отчет</button>
+                <div class="right-column">
+                    <div class="card">
+                        <h2>Списък с инциденти</h2>
+                        
+                        <div class="filters">
+                            <button class="filter-btn active" data-filter="all">Всички</button>
+                            <button class="filter-btn" data-filter="new">Нови</button>
+                            <button class="filter-btn" data-filter="in-progress">В процес</button>
+                            <button class="filter-btn" data-filter="resolved">Разрешени</button>
+                            <button class="filter-btn" data-filter="closed">Приключени</button>
                         </div>
-                        <div id="reportResult" style="margin-top: 15px;"></div>
+                        
+                        <div class="incident-list" id="incidentList">
+                            <div class="no-incidents">Все още няма докладвани инциденти</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>Отчети</h2>
+                        <div class="report-section">
+                            <p>Генериране на отчети за инциденти</p>
+                            <div class="report-actions">
+                                <button id="generateReport" class="btn-success">Генерирай отчет</button>
+                                <button id="downloadReport" class="btn-info">Свали отчет</button>
+                                <button id="printReport" class="btn-warning">Принтирай отчет</button>
+                            </div>
+                            <div id="reportResult" style="margin-top: 15px;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Модален прозорец за сканиран инцидент -->
-    <div class="modal" id="scannedIncidentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Сканиран инцидент</h2>
-                <span class="close-btn" id="closeScannedModal">&times;</span>
-            </div>
-            <div class="incident-details" id="scannedIncidentDetails">
-                <!-- Детайлите ще се попълнят динамично -->
-            </div>
+    <!-- Mobile View for QR Scanning -->
+    <div class="mobile-view" id="mobileView">
+        <div class="mobile-header">
+            <h1>IRP Система</h1>
+            <p>Промяна на статус на инцидент</p>
+        </div>
+        
+        <div id="mobileIncidentInfo" class="mobile-incident-info" style="display: none;">
+            <h2>Информация за инцидента</h2>
+            <div id="mobileIncidentDetails"></div>
+        </div>
+        
+        <div id="mobileStatusForm" class="mobile-status-form" style="display: none;">
+            <h2>Промяна на статус</h2>
+            <p>Изберете нов статус:</p>
             
-            <div class="status-change-form">
-                <h3>Промяна на статус</h3>
-                <p>Изберете нов статус за инцидента:</p>
-                
-                <div class="status-options" id="statusOptions">
-                    <label class="status-option" for="status-new">
-                        <input type="radio" id="status-new" name="status" value="new">
-                        <span class="status-badge status-new">Нов</span>
-                    </label>
-                    <label class="status-option" for="status-in-progress">
-                        <input type="radio" id="status-in-progress" name="status" value="in-progress">
-                        <span class="status-badge status-in-progress">В процес</span>
-                    </label>
-                    <label class="status-option" for="status-resolved">
-                        <input type="radio" id="status-resolved" name="status" value="resolved">
-                        <span class="status-badge status-resolved">Разрешен</span>
-                    </label>
-                    <label class="status-option" for="status-closed">
-                        <input type="radio" id="status-closed" name="status" value="closed">
-                        <span class="status-badge status-closed">Приключен</span>
-                    </label>
-                </div>
-                
-                <div class="quick-action-buttons">
-                    <button class="btn-success" id="updateStatus">Обнови статус</button>
-                    <button class="btn-info" id="viewDetails">Виж пълни детайли</button>
-                </div>
-            </div>
+            <button class="status-btn status-new" data-status="new">Нов</button>
+            <button class="status-btn status-in-progress" data-status="in-progress">В процес</button>
+            <button class="status-btn status-resolved" data-status="resolved">Разрешен</button>
+            <button class="status-btn status-closed" data-status="closed">Приключен</button>
+        </div>
+        
+        <div id="successMessage" class="success-message">
+            Статусът е актуализиран успешно!
+        </div>
+        
+        <div id="mobileNoIncident" class="mobile-incident-info">
+            <h2>Няма избран инцидент</h2>
+            <p>Сканирайте QR код на инцидент, за да промените статуса му.</p>
+            <p>QR кодовете се генерират от десктоп версията на системата.</p>
         </div>
     </div>
 
@@ -682,6 +738,11 @@
         let selectedIncidentId = null;
         let systemLog = JSON.parse(localStorage.getItem('systemLog')) || [];
         let currentScannedIncident = null;
+        
+        // Проверка дали сме на мобилно устройство
+        function isMobileDevice() {
+            return window.innerWidth <= 767;
+        }
         
         // Функция за записване на лог
         function addLogEntry(message) {
@@ -698,6 +759,8 @@
         // Функция за обновяване на дисплея на лога
         function updateLogDisplay() {
             const logContainer = document.getElementById('systemLog');
+            if (!logContainer) return;
+            
             logContainer.innerHTML = '';
             
             systemLog.forEach(entry => {
@@ -717,15 +780,21 @@
         
         // Функция за обновяване на статистиката
         function updateStats() {
-            document.getElementById('total-incidents').textContent = incidents.length;
-            document.getElementById('new-incidents').textContent = incidents.filter(i => i.status === 'new').length;
-            document.getElementById('in-progress-incidents').textContent = incidents.filter(i => i.status === 'in-progress').length;
-            document.getElementById('resolved-incidents').textContent = incidents.filter(i => i.status === 'resolved').length;
+            const totalElem = document.getElementById('total-incidents');
+            const newElem = document.getElementById('new-incidents');
+            const inProgressElem = document.getElementById('in-progress-incidents');
+            const resolvedElem = document.getElementById('resolved-incidents');
+            
+            if (totalElem) totalElem.textContent = incidents.length;
+            if (newElem) newElem.textContent = incidents.filter(i => i.status === 'new').length;
+            if (inProgressElem) inProgressElem.textContent = incidents.filter(i => i.status === 'in-progress').length;
+            if (resolvedElem) resolvedElem.textContent = incidents.filter(i => i.status === 'resolved').length;
         }
         
         // Функция за показване на инцидентите
         function displayIncidents() {
             const incidentList = document.getElementById('incidentList');
+            if (!incidentList) return;
             
             // Филтриране на инцидентите
             let filteredIncidents = incidents;
@@ -829,11 +898,9 @@
                     updateSelectedIncidentInfo();
                 }
                 
-                // Ако това е сканирания инцидент, затваряме модала
-                if (currentScannedIncident && currentScannedIncident.id === id) {
-                    closeScannedModal();
-                }
+                return true;
             }
+            return false;
         }
         
         // Функция за изтриване на инцидент
@@ -870,32 +937,45 @@
             if (!incident) return;
             
             const detailsContainer = document.getElementById('selectedIncidentDetails');
-            detailsContainer.innerHTML = `
-                <div><strong>${incident.title}</strong></div>
-                <div>Статус: ${getStatusText(incident.status)}</div>
-                <div>Приоритет: ${getPriorityText(incident.priority)}</div>
-                <div>Докладчик: ${incident.reporter}</div>
-            `;
-            
-            document.getElementById('selectedIncidentInfo').style.display = 'block';
+            if (detailsContainer) {
+                detailsContainer.innerHTML = `
+                    <div><strong>${incident.title}</strong></div>
+                    <div>Статус: ${getStatusText(incident.status)}</div>
+                    <div>Приоритет: ${getPriorityText(incident.priority)}</div>
+                    <div>Докладчик: ${incident.reporter}</div>
+                `;
+                
+                document.getElementById('selectedIncidentInfo').style.display = 'block';
+            }
         }
         
         // Функция за показване на бутона за генериране на QR код
         function showGenerateQRButton() {
-            document.getElementById('qrMessage').style.display = 'none';
-            document.getElementById('generateQR').style.display = 'inline-block';
-            document.getElementById('qrCodeContainer').style.display = 'none';
-            document.getElementById('qrActionButtons').style.display = 'none';
+            const generateBtn = document.getElementById('generateQR');
+            const qrMessage = document.getElementById('qrMessage');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrActionButtons = document.getElementById('qrActionButtons');
+            
+            if (generateBtn) generateBtn.style.display = 'inline-block';
+            if (qrMessage) qrMessage.style.display = 'none';
+            if (qrCodeContainer) qrCodeContainer.style.display = 'none';
+            if (qrActionButtons) qrActionButtons.style.display = 'none';
         }
         
         // Функция за ресетване на QR секцията
         function resetQRCodeSection() {
             selectedIncidentId = null;
-            document.getElementById('qrMessage').style.display = 'block';
-            document.getElementById('generateQR').style.display = 'none';
-            document.getElementById('qrCodeContainer').style.display = 'none';
-            document.getElementById('qrActionButtons').style.display = 'none';
-            document.getElementById('selectedIncidentInfo').style.display = 'none';
+            const generateBtn = document.getElementById('generateQR');
+            const qrMessage = document.getElementById('qrMessage');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrActionButtons = document.getElementById('qrActionButtons');
+            const selectedIncidentInfo = document.getElementById('selectedIncidentInfo');
+            
+            if (generateBtn) generateBtn.style.display = 'none';
+            if (qrMessage) qrMessage.style.display = 'block';
+            if (qrCodeContainer) qrCodeContainer.style.display = 'none';
+            if (qrActionButtons) qrActionButtons.style.display = 'none';
+            if (selectedIncidentInfo) selectedIncidentInfo.style.display = 'none';
         }
         
         // Функция за генериране на QR код
@@ -911,7 +991,7 @@
             // Създаваме URL адрес, който директно сочи към този сайт със специален параметър
             // Използваме текущия URL на страницата
             const currentUrl = window.location.href.split('?')[0]; // Премахваме съществуващите параметри
-            const qrData = `${currentUrl}?scan=true&incident=${incident.id}`;
+            const qrData = `${currentUrl}?mobile=true&incident=${incident.id}`;
             
             // Генериране на QR код
             const qrContainer = document.getElementById('qrcode');
@@ -1202,151 +1282,89 @@
             addLogEntry('Отчетът е принтиран');
         }
         
-        // Функция за показване на сканирания инцидент
-        function showScannedIncident(incident) {
-            currentScannedIncident = incident;
-            const modal = document.getElementById('scannedIncidentModal');
-            const detailsContainer = document.getElementById('scannedIncidentDetails');
-            
-            detailsContainer.innerHTML = `
-                <div class="detail-row">
-                    <span class="detail-label">ID:</span>
-                    <span class="detail-value">${incident.id}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Заглавие:</span>
-                    <span class="detail-value">${incident.title}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Описание:</span>
-                    <span class="detail-value">${incident.description}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Докладчик:</span>
-                    <span class="detail-value">${incident.reporter}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Приоритет:</span>
-                    <span class="detail-value">${getPriorityText(incident.priority)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Текущ статус:</span>
-                    <span class="detail-value status-badge status-${incident.status}">${getStatusText(incident.status)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Дата:</span>
-                    <span class="detail-value">${new Date(incident.date).toLocaleDateString('bg-BG')}</span>
-                </div>
-            `;
-            
-            // Маркираме текущия статус
-            document.querySelectorAll('.status-option').forEach(option => {
-                option.classList.remove('selected');
-                if (option.querySelector('input').value === incident.status) {
-                    option.classList.add('selected');
-                }
-            });
-            
-            // Избираме текущия статус в радио бутоните
-            document.querySelector(`input[name="status"][value="${incident.status}"]`).checked = true;
-            
-            modal.style.display = 'flex';
-            addLogEntry(`Отворен е модал за сканиран инцидент #${incident.id}`);
-        }
-        
-        // Функция за затваряне на модала за сканиран инцидент
-        function closeScannedModal() {
-            document.getElementById('scannedIncidentModal').style.display = 'none';
-            currentScannedIncident = null;
-            addLogEntry('Модалът за сканиран инцидент е затворен');
-        }
-        
-        // Функция за обновяване на статуса от модала
-        function updateStatusFromModal() {
-            if (!currentScannedIncident) return;
-            
-            const selectedStatus = document.querySelector('input[name="status"]:checked').value;
-            
-            if (selectedStatus === currentScannedIncident.status) {
-                alert('Инцидентът вече има този статус!');
+        // Функция за показване на мобилния изглед за инцидент
+        function showMobileIncidentView(incidentId) {
+            const incident = incidents.find(i => i.id == incidentId);
+            if (!incident) {
+                document.getElementById('mobileNoIncident').style.display = 'block';
+                document.getElementById('mobileIncidentInfo').style.display = 'none';
+                document.getElementById('mobileStatusForm').style.display = 'none';
                 return;
             }
             
-            updateStatus(currentScannedIncident.id, selectedStatus);
-            closeScannedModal();
+            // Показваме информацията за инцидента
+            const detailsContainer = document.getElementById('mobileIncidentDetails');
+            detailsContainer.innerHTML = `
+                <div><strong>Заглавие:</strong> ${incident.title}</div>
+                <div><strong>Описание:</strong> ${incident.description}</div>
+                <div><strong>Докладчик:</strong> ${incident.reporter}</div>
+                <div><strong>Приоритет:</strong> ${getPriorityText(incident.priority)}</div>
+                <div><strong>Текущ статус:</strong> <span class="status-badge status-${incident.status}">${getStatusText(incident.status)}</span></div>
+                <div><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
+            `;
+            
+            document.getElementById('mobileNoIncident').style.display = 'none';
+            document.getElementById('mobileIncidentInfo').style.display = 'block';
+            document.getElementById('mobileStatusForm').style.display = 'block';
+            
+            // Запазваме текущия инцидент
+            currentScannedIncident = incident;
         }
         
-        // Функция за преглед на пълни детайли
-        function viewFullDetails() {
-            if (currentScannedIncident) {
-                selectIncident(currentScannedIncident.id);
-                closeScannedModal();
+        // Функция за обновяване на статуса от мобилния изглед
+        function updateStatusFromMobile(newStatus) {
+            if (!currentScannedIncident) return;
+            
+            const success = updateStatus(currentScannedIncident.id, newStatus);
+            
+            if (success) {
+                // Показваме съобщение за успех
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+                successMessage.textContent = `Статусът е променен на: ${getStatusText(newStatus)}`;
+                
+                // Скриваме съобщението след 3 секунди
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+                
+                // Обновяваме информацията за инцидента
+                showMobileIncidentView(currentScannedIncident.id);
             }
-        }
-        
-        // Симулация на сканиране на QR код
-        function startCamera() {
-            const cameraPreview = document.getElementById('camera-preview');
-            const startBtn = document.getElementById('startCamera');
-            const stopBtn = document.getElementById('stopCamera');
-            const scanResult = document.getElementById('scanResult');
-            
-            cameraPreview.innerHTML = '<p>Симулация на сканиране...</p>';
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'inline-block';
-            scanResult.innerHTML = '<p>Сканира се QR код...</p>';
-            
-            // Симулиране на сканиране след 2 секунди
-            setTimeout(() => {
-                if (incidents.length > 0) {
-                    const randomIncident = incidents[Math.floor(Math.random() * incidents.length)];
-                    scanResult.innerHTML = `
-                        <p style="color: green;">QR кодът е сканиран успешно!</p>
-                        <p><strong>Инцидент:</strong> ${randomIncident.title}</p>
-                        <p><strong>Статус:</strong> ${getStatusText(randomIncident.status)}</p>
-                    `;
-                    addLogEntry(`Сканиран е QR код за инцидент #${randomIncident.id}`);
-                    
-                    // Показваме модал с детайли за сканирания инцидент
-                    showScannedIncident(randomIncident);
-                } else {
-                    scanResult.innerHTML = '<p style="color: orange;">Няма инциденти в системата за сканиране.</p>';
-                }
-            }, 2000);
-        }
-        
-        // Спиране на камерата
-        function stopCamera() {
-            const cameraPreview = document.getElementById('camera-preview');
-            const startBtn = document.getElementById('startCamera');
-            const stopBtn = document.getElementById('stopCamera');
-            const scanResult = document.getElementById('scanResult');
-            
-            cameraPreview.innerHTML = '<p>Камерата ще се активира при натискане на бутона</p>';
-            startBtn.style.display = 'inline-block';
-            stopBtn.style.display = 'none';
-            scanResult.innerHTML = '';
         }
         
         // Функция за проверка на URL параметри при зареждане на страницата
         function checkUrlParameters() {
             const urlParams = new URLSearchParams(window.location.search);
-            const scanParam = urlParams.get('scan');
+            const mobileParam = urlParams.get('mobile');
             const incidentId = urlParams.get('incident');
             
-            if (scanParam === 'true' && incidentId) {
-                const incident = incidents.find(i => i.id == incidentId);
-                if (incident) {
-                    // Премахваме параметрите от URL адреса
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    
-                    // Показваме модала със сканирания инцидент
-                    showScannedIncident(incident);
-                    addLogEntry(`Автоматично отворен модал за инцидент #${incident.id} от URL параметър`);
-                } else {
-                    addLogEntry(`Опит за отваряне на несъществуващ инцидент #${incidentId} от URL параметър`);
-                }
+            if (mobileParam === 'true' && incidentId) {
+                // Показваме мобилния изглед
+                document.querySelector('.desktop-view').style.display = 'none';
+                document.getElementById('mobileView').style.display = 'block';
+                
+                // Показваме информацията за инцидента
+                showMobileIncidentView(incidentId);
+                addLogEntry(`Отворен е мобилен изглед за инцидент #${incidentId}`);
             }
+        }
+        
+        // Инициализация на приложението
+        function initApp() {
+            updateStats();
+            displayIncidents();
+            updateLogDisplay();
+            checkUrlParameters(); // Проверяваме за URL параметри при зареждане
+            addLogEntry('Системата е стартирана');
+            
+            // Добавяме event listeners за бутоните в мобилния изглед
+            document.querySelectorAll('.status-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const newStatus = this.getAttribute('data-status');
+                    updateStatusFromMobile(newStatus);
+                });
+            });
         }
         
         // Обработка на подаването на формуляра
@@ -1384,26 +1402,9 @@
         document.getElementById('generateReport').addEventListener('click', generateReport);
         document.getElementById('downloadReport').addEventListener('click', downloadReport);
         document.getElementById('printReport').addEventListener('click', printReport);
-        document.getElementById('startCamera').addEventListener('click', startCamera);
-        document.getElementById('stopCamera').addEventListener('click', stopCamera);
-        document.getElementById('closeScannedModal').addEventListener('click', closeScannedModal);
-        document.getElementById('updateStatus').addEventListener('click', updateStatusFromModal);
-        document.getElementById('viewDetails').addEventListener('click', viewFullDetails);
         
-        // Затваряне на модала при клик извън него
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('scannedIncidentModal');
-            if (event.target === modal) {
-                closeScannedModal();
-            }
-        });
-        
-        // Инициализация на приложението
-        updateStats();
-        displayIncidents();
-        updateLogDisplay();
-        checkUrlParameters(); // Проверяваме за URL параметри при зареждане
-        addLogEntry('Системата е стартирана');
+        // Стартиране на приложението
+        initApp();
     </script>
 </body>
 </html>
