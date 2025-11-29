@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IRP Система - Инцидентно Отчитане</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -766,30 +766,55 @@
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
             
-            // Използваме QRCode.toCanvas за генериране на QR кода
-            QRCode.toCanvas(qrData, { 
-                width: 180, 
-                margin: 1,
-                color: {
-                    dark: '#2c3e50',
-                    light: '#ffffff'
-                }
-            }, function(error, canvas) {
-                if (error) {
-                    console.error('Грешка при генериране на QR код:', error);
-                    qrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
-                    return;
+            try {
+                // Използваме qrcode-generator библиотеката
+                const typeNumber = 0; // Автоматично определяне
+                const errorCorrectionLevel = 'L';
+                const qr = qrcode(typeNumber, errorCorrectionLevel);
+                qr.addData(qrData);
+                qr.make();
+                
+                // Създаваме canvas елемент
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const size = 180;
+                canvas.width = size;
+                canvas.height = size;
+                
+                // Изчисляваме размера на клетката
+                const moduleCount = qr.getModuleCount();
+                const cellSize = size / moduleCount;
+                
+                // Рисуваме QR кода
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+                ctx.fillStyle = '#2c3e50';
+                
+                for (let row = 0; row < moduleCount; row++) {
+                    for (let col = 0; col < moduleCount; col++) {
+                        if (qr.isDark(row, col)) {
+                            ctx.fillRect(
+                                col * cellSize, 
+                                row * cellSize, 
+                                cellSize, 
+                                cellSize
+                            );
+                        }
+                    }
                 }
                 
                 qrContainer.appendChild(canvas);
                 
-                // Показване на QR кода
+                // Показваме QR кода
                 document.getElementById('generateQR').style.display = 'none';
                 document.getElementById('qrCodeContainer').style.display = 'inline-block';
                 document.getElementById('qrActionButtons').style.display = 'flex';
                 
                 addLogEntry(`Генериран е QR код за инцидент #${incident.id}`);
-            });
+            } catch (error) {
+                console.error('Грешка при генериране на QR код:', error);
+                qrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
+            }
         }
         
         // Функция за сваляне на QR кода
