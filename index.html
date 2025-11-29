@@ -133,6 +133,12 @@
             margin-bottom: 12px;
             background-color: #f8f9fa;
             border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .incident-item.selected {
+            border-left: 4px solid var(--success);
+            background-color: #e8f5e8;
         }
         
         .incident-header {
@@ -336,6 +342,14 @@
             flex-wrap: wrap;
         }
         
+        .selected-incident-info {
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--success);
+        }
+        
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -403,13 +417,21 @@
                 <div class="card">
                     <h2>QR код за инцидент</h2>
                     <div class="qr-section" id="qrSection">
-                        <p>Изберете инцидент от списъка и генерирайте QR код за него</p>
-                        <div class="qr-actions">
-                            <button id="generateQR" class="btn-success">Генерирай QR код</button>
+                        <p id="qrMessage">Изберете инцидент от списъка и генерирайте QR код за него</p>
+                        
+                        <div id="selectedIncidentInfo" class="selected-incident-info" style="display: none;">
+                            <strong>Избран инцидент:</strong>
+                            <div id="selectedIncidentDetails"></div>
                         </div>
-                        <div class="qr-code-container" style="display: none;">
+                        
+                        <div class="qr-actions">
+                            <button id="generateQR" class="btn-success" style="display: none;">Генерирай QR код</button>
+                        </div>
+                        
+                        <div class="qr-code-container" id="qrCodeContainer" style="display: none;">
                             <div id="qrcode"></div>
                         </div>
+                        
                         <div class="qr-actions" id="qrActionButtons" style="display: none;">
                             <button id="downloadQR" class="btn-success">Свали QR кода</button>
                             <button id="printQR" class="btn-warning">Принтирай QR кода</button>
@@ -568,8 +590,9 @@
             incidentList.innerHTML = '';
             
             filteredIncidents.forEach((incident) => {
+                const isSelected = incident.id === selectedIncidentId;
                 const incidentElement = document.createElement('div');
-                incidentElement.className = 'incident-item';
+                incidentElement.className = `incident-item ${isSelected ? 'selected' : ''}`;
                 incidentElement.innerHTML = `
                     <div class="incident-header">
                         <div class="incident-title">${incident.title}</div>
@@ -582,7 +605,9 @@
                             <span style="margin-left: 10px; font-size: 12px;">Приоритет: ${getPriorityText(incident.priority)}</span>
                         </div>
                         <div class="actions">
-                            <button class="action-btn" onclick="selectIncident(${incident.id})">Избери</button>
+                            <button class="action-btn ${isSelected ? 'btn-success' : ''}" onclick="selectIncident(${incident.id})">
+                                ${isSelected ? '✓ Избран' : 'Избери'}
+                            </button>
                             ${incident.status === 'new' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'in-progress\')">Започни</button>' : ''}
                             ${incident.status === 'in-progress' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'resolved\')">Разреши</button>' : ''}
                             ${incident.status === 'resolved' ? '<button class="action-btn" onclick="updateStatus(' + incident.id + ', \'closed\')">Приключи</button>' : ''}
@@ -650,7 +675,7 @@
                 
                 // Ако инцидентът е избран, обновяваме QR кода
                 if (selectedIncidentId === id) {
-                    generateQRCode(id);
+                    updateSelectedIncidentInfo();
                 }
             }
         }
@@ -668,10 +693,7 @@
                     
                     // Ако изтрития инцидент е бил избран, скриваме QR секцията
                     if (selectedIncidentId === id) {
-                        selectedIncidentId = null;
-                        document.querySelector('.qr-code-container').style.display = 'none';
-                        document.getElementById('qrActionButtons').style.display = 'none';
-                        document.getElementById('generateQR').style.display = 'inline-block';
+                        resetQRCodeSection();
                     }
                 }
             }
@@ -680,12 +702,48 @@
         // Функция за избор на инцидент за QR код
         function selectIncident(id) {
             selectedIncidentId = id;
-            document.getElementById('generateQR').style.display = 'inline-block';
+            displayIncidents();
+            updateSelectedIncidentInfo();
+            showGenerateQRButton();
             addLogEntry(`Инцидент #${id} е избран за генериране на QR код`);
         }
         
+        // Функция за обновяване на информацията за избрания инцидент
+        function updateSelectedIncidentInfo() {
+            const incident = incidents.find(i => i.id === selectedIncidentId);
+            if (!incident) return;
+            
+            const detailsContainer = document.getElementById('selectedIncidentDetails');
+            detailsContainer.innerHTML = `
+                <div><strong>${incident.title}</strong></div>
+                <div>Статус: ${getStatusText(incident.status)}</div>
+                <div>Приоритет: ${getPriorityText(incident.priority)}</div>
+                <div>Докладчик: ${incident.reporter}</div>
+            `;
+            
+            document.getElementById('selectedIncidentInfo').style.display = 'block';
+        }
+        
+        // Функция за показване на бутона за генериране на QR код
+        function showGenerateQRButton() {
+            document.getElementById('qrMessage').style.display = 'none';
+            document.getElementById('generateQR').style.display = 'inline-block';
+            document.getElementById('qrCodeContainer').style.display = 'none';
+            document.getElementById('qrActionButtons').style.display = 'none';
+        }
+        
+        // Функция за ресетване на QR секцията
+        function resetQRCodeSection() {
+            selectedIncidentId = null;
+            document.getElementById('qrMessage').style.display = 'block';
+            document.getElementById('generateQR').style.display = 'none';
+            document.getElementById('qrCodeContainer').style.display = 'none';
+            document.getElementById('qrActionButtons').style.display = 'none';
+            document.getElementById('selectedIncidentInfo').style.display = 'none';
+        }
+        
         // Функция за генериране на QR код
-        function generateQRCode(incidentId) {
+        function generateQRCode() {
             if (!selectedIncidentId) {
                 alert('Моля, изберете първо инцидент от списъка!');
                 return;
@@ -709,24 +767,26 @@
             qrContainer.innerHTML = '';
             
             // Използваме QRCode.toCanvas за генериране на QR кода
-            QRCode.toCanvas(qrContainer, qrData, { 
+            QRCode.toCanvas(qrData, { 
                 width: 180, 
                 margin: 1,
                 color: {
                     dark: '#2c3e50',
                     light: '#ffffff'
                 }
-            }, function(error) {
+            }, function(error, canvas) {
                 if (error) {
                     console.error('Грешка при генериране на QR код:', error);
                     qrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
                     return;
                 }
                 
+                qrContainer.appendChild(canvas);
+                
                 // Показване на QR кода
-                document.querySelector('.qr-code-container').style.display = 'inline-block';
-                document.getElementById('qrActionButtons').style.display = 'flex';
                 document.getElementById('generateQR').style.display = 'none';
+                document.getElementById('qrCodeContainer').style.display = 'inline-block';
+                document.getElementById('qrActionButtons').style.display = 'flex';
                 
                 addLogEntry(`Генериран е QR код за инцидент #${incident.id}`);
             });
@@ -849,6 +909,7 @@
                 updateStats();
                 displayIncidents();
                 updateLogDisplay();
+                resetQRCodeSection();
                 addLogEntry('Всички данни са изтрити');
             }
         }
