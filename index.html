@@ -114,6 +114,14 @@
             background-color: #e67e22;
         }
         
+        .btn-info {
+            background-color: #17a2b8;
+        }
+        
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        
         .incident-list {
             max-height: 500px;
             overflow-y: auto;
@@ -261,6 +269,73 @@
             color: var(--primary);
         }
         
+        .data-management {
+            margin-top: 15px;
+        }
+        
+        .data-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .log-section {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .scan-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .camera-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        #camera-preview {
+            width: 100%;
+            height: 200px;
+            background-color: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .report-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -278,6 +353,11 @@
             
             .card {
                 padding: 20px;
+            }
+            
+            .data-actions {
+                flex-direction: row;
+                justify-content: space-between;
             }
         }
     </style>
@@ -324,13 +404,31 @@
                     <h2>QR код за инцидент</h2>
                     <div class="qr-section" id="qrSection">
                         <p>Изберете инцидент от списъка и генерирайте QR код за него</p>
-                        <div class="qr-code-container">
+                        <div class="qr-actions">
+                            <button id="generateQR" class="btn-success">Генерирай QR код</button>
+                        </div>
+                        <div class="qr-code-container" style="display: none;">
                             <div id="qrcode"></div>
                         </div>
-                        <div class="qr-actions">
-                            <button id="downloadQR" class="btn-success" style="display: none;">Свали QR кода</button>
-                            <button id="printQR" class="btn-warning" style="display: none;">Принтирай QR кода</button>
+                        <div class="qr-actions" id="qrActionButtons" style="display: none;">
+                            <button id="downloadQR" class="btn-success">Свали QR кода</button>
+                            <button id="printQR" class="btn-warning">Принтирай QR кода</button>
                         </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Сканиране на QR код</h2>
+                    <div class="scan-section">
+                        <p>Сканирайте QR код на инцидент за бърз достъп</p>
+                        <div class="camera-container">
+                            <div id="camera-preview">
+                                <p>Камерата ще се активира при натискане на бутона</p>
+                            </div>
+                            <button id="startCamera" class="btn-success">Стартирай сканиране</button>
+                            <button id="stopCamera" class="btn-danger" style="display: none;">Спри сканирането</button>
+                        </div>
+                        <div id="scanResult"></div>
                     </div>
                 </div>
                 
@@ -355,6 +453,21 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="card">
+                    <h2>Управление на данни</h2>
+                    <div class="data-management">
+                        <div class="data-actions">
+                            <button id="exportData" class="btn-info">Експортирай данни</button>
+                            <button id="importData" class="btn-info">Импортирай данни</button>
+                            <button id="clearData" class="btn-danger">Изтрий всички данни</button>
+                        </div>
+                        <div class="log-section">
+                            <h3>Системен лог</h3>
+                            <div id="systemLog"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="right-column">
@@ -373,6 +486,19 @@
                         <div class="no-incidents">Все още няма докладвани инциденти</div>
                     </div>
                 </div>
+                
+                <div class="card">
+                    <h2>Отчети</h2>
+                    <div class="report-section">
+                        <p>Генериране на отчети за инциденти</p>
+                        <div class="report-actions">
+                            <button id="generateReport" class="btn-success">Генерирай отчет</button>
+                            <button id="downloadReport" class="btn-info">Свали отчет</button>
+                            <button id="printReport" class="btn-warning">Принтирай отчет</button>
+                        </div>
+                        <div id="reportResult" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -382,11 +508,38 @@
         let incidents = JSON.parse(localStorage.getItem('incidents')) || [];
         let currentFilter = 'all';
         let selectedIncidentId = null;
+        let systemLog = JSON.parse(localStorage.getItem('systemLog')) || [];
+        
+        // Функция за записване на лог
+        function addLogEntry(message) {
+            const timestamp = new Date().toLocaleString('bg-BG');
+            systemLog.unshift({ timestamp, message });
+            // Запазваме само последните 50 записа
+            if (systemLog.length > 50) {
+                systemLog = systemLog.slice(0, 50);
+            }
+            localStorage.setItem('systemLog', JSON.stringify(systemLog));
+            updateLogDisplay();
+        }
+        
+        // Функция за обновяване на дисплея на лога
+        function updateLogDisplay() {
+            const logContainer = document.getElementById('systemLog');
+            logContainer.innerHTML = '';
+            
+            systemLog.forEach(entry => {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `<strong>${entry.timestamp}</strong>: ${entry.message}`;
+                logContainer.appendChild(logEntry);
+            });
+        }
         
         // Функция за запазване на инцидентите в localStorage
         function saveIncidents() {
             localStorage.setItem('incidents', JSON.stringify(incidents));
             updateStats();
+            addLogEntry(`Данните са запазени. Общо инциденти: ${incidents.length}`);
         }
         
         // Функция за обновяване на статистиката
@@ -479,6 +632,7 @@
             incidents.push(newIncident);
             saveIncidents();
             displayIncidents();
+            addLogEntry(`Добавен е нов инцидент: "${title}" от ${reporter}`);
             
             // Автоматично избиране на новия инцидент
             selectIncident(newIncident.id);
@@ -488,9 +642,11 @@
         function updateStatus(id, newStatus) {
             const incidentIndex = incidents.findIndex(incident => incident.id === id);
             if (incidentIndex !== -1) {
+                const oldStatus = incidents[incidentIndex].status;
                 incidents[incidentIndex].status = newStatus;
                 saveIncidents();
                 displayIncidents();
+                addLogEntry(`Инцидент #${id} е променен от "${getStatusText(oldStatus)}" на "${getStatusText(newStatus)}"`);
                 
                 // Ако инцидентът е избран, обновяваме QR кода
                 if (selectedIncidentId === id) {
@@ -502,16 +658,21 @@
         // Функция за изтриване на инцидент
         function deleteIncident(id) {
             if (confirm('Сигурни ли сте, че искате да изтриете този инцидент?')) {
-                incidents = incidents.filter(incident => incident.id !== id);
-                saveIncidents();
-                displayIncidents();
-                
-                // Ако изтрития инцидент е бил избран, скриваме QR секцията
-                if (selectedIncidentId === id) {
-                    selectedIncidentId = null;
-                    document.getElementById('qrSection').innerHTML = '<p>Изберете инцидент от списъка и генерирайте QR код за него</p>';
-                    document.getElementById('downloadQR').style.display = 'none';
-                    document.getElementById('printQR').style.display = 'none';
+                const incidentIndex = incidents.findIndex(incident => incident.id === id);
+                if (incidentIndex !== -1) {
+                    const incidentTitle = incidents[incidentIndex].title;
+                    incidents = incidents.filter(incident => incident.id !== id);
+                    saveIncidents();
+                    displayIncidents();
+                    addLogEntry(`Инцидент #${id} "${incidentTitle}" е изтрит`);
+                    
+                    // Ако изтрития инцидент е бил избран, скриваме QR секцията
+                    if (selectedIncidentId === id) {
+                        selectedIncidentId = null;
+                        document.querySelector('.qr-code-container').style.display = 'none';
+                        document.getElementById('qrActionButtons').style.display = 'none';
+                        document.getElementById('generateQR').style.display = 'inline-block';
+                    }
                 }
             }
         }
@@ -519,12 +680,18 @@
         // Функция за избор на инцидент за QR код
         function selectIncident(id) {
             selectedIncidentId = id;
-            generateQRCode(id);
+            document.getElementById('generateQR').style.display = 'inline-block';
+            addLogEntry(`Инцидент #${id} е избран за генериране на QR код`);
         }
         
         // Функция за генериране на QR код
         function generateQRCode(incidentId) {
-            const incident = incidents.find(i => i.id === incidentId);
+            if (!selectedIncidentId) {
+                alert('Моля, изберете първо инцидент от списъка!');
+                return;
+            }
+            
+            const incident = incidents.find(i => i.id === selectedIncidentId);
             if (!incident) return;
             
             const qrData = JSON.stringify({
@@ -556,68 +723,43 @@
                     return;
                 }
                 
-                // Показване на информация за инцидента в QR секцията
-                document.getElementById('qrSection').innerHTML = `
-                    <p><strong>${incident.title}</strong></p>
-                    <p>Статус: ${getStatusText(incident.status)}</p>
-                    <div class="qr-code-container">
-                        <div id="qrcode"></div>
-                    </div>
-                    <div class="qr-actions">
-                        <button id="downloadQR" class="btn-success">Свали QR кода</button>
-                        <button id="printQR" class="btn-warning">Принтирай QR кода</button>
-                    </div>
-                `;
+                // Показване на QR кода
+                document.querySelector('.qr-code-container').style.display = 'inline-block';
+                document.getElementById('qrActionButtons').style.display = 'flex';
+                document.getElementById('generateQR').style.display = 'none';
                 
-                // Прегенериране на QR кода в новия контейнер
-                const newQrContainer = document.getElementById('qrcode');
-                QRCode.toCanvas(newQrContainer, qrData, { 
-                    width: 180, 
-                    margin: 1,
-                    color: {
-                        dark: '#2c3e50',
-                        light: '#ffffff'
-                    }
-                }, function(error) {
-                    if (error) {
-                        console.error('Грешка при генериране на QR код:', error);
-                        newQrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
-                        return;
-                    }
-                    
-                    // Добавяне на event listeners за бутоните
-                    document.getElementById('downloadQR').addEventListener('click', function() {
-                        downloadQRCode(incident);
-                    });
-                    
-                    document.getElementById('printQR').addEventListener('click', function() {
-                        printQRCode(incident);
-                    });
-                });
+                addLogEntry(`Генериран е QR код за инцидент #${incident.id}`);
             });
         }
         
         // Функция за сваляне на QR кода
-        function downloadQRCode(incident) {
+        function downloadQRCode() {
             const canvas = document.querySelector('#qrcode canvas');
             if (!canvas) {
                 alert('Няма генериран QR код за сваляне');
                 return;
             }
             
+            const incident = incidents.find(i => i.id === selectedIncidentId);
+            if (!incident) return;
+            
             const link = document.createElement('a');
             link.download = `incident-${incident.id}-${incident.title.replace(/\s+/g, '-')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
+            addLogEntry(`QR код за инцидент #${incident.id} е изтеглен`);
         }
         
         // Функция за принтиране на QR кода
-        function printQRCode(incident) {
+        function printQRCode() {
             const canvas = document.querySelector('#qrcode canvas');
             if (!canvas) {
                 alert('Няма генериран QR код за принтиране');
                 return;
             }
+            
+            const incident = incidents.find(i => i.id === selectedIncidentId);
+            if (!incident) return;
             
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -650,6 +792,219 @@
                 </html>
             `);
             printWindow.document.close();
+            addLogEntry(`QR код за инцидент #${incident.id} е принтиран`);
+        }
+        
+        // Функция за експорт на данни
+        function exportData() {
+            const dataStr = JSON.stringify(incidents, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.download = 'irp-system-data.json';
+            link.href = URL.createObjectURL(dataBlob);
+            link.click();
+            addLogEntry('Данните са експортирани във файл');
+        }
+        
+        // Функция за импорт на данни
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = event => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        if (Array.isArray(importedData)) {
+                            incidents = importedData;
+                            saveIncidents();
+                            displayIncidents();
+                            addLogEntry(`Данните са импортирани успешно. Добавени са ${importedData.length} инцидента`);
+                        } else {
+                            alert('Невалиден формат на файла');
+                        }
+                    } catch (error) {
+                        alert('Грешка при прочитане на файла: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+        
+        // Функция за изтриване на всички данни
+        function clearData() {
+            if (confirm('Сигурни ли сте, че искате да изтриете всички данни? Това действие не може да бъде отменено!')) {
+                incidents = [];
+                systemLog = [];
+                localStorage.removeItem('incidents');
+                localStorage.removeItem('systemLog');
+                updateStats();
+                displayIncidents();
+                updateLogDisplay();
+                addLogEntry('Всички данни са изтрити');
+            }
+        }
+        
+        // Функция за генериране на отчет
+        function generateReport() {
+            if (incidents.length === 0) {
+                document.getElementById('reportResult').innerHTML = '<p style="color: orange;">Няма данни за отчет</p>';
+                return;
+            }
+            
+            let reportHTML = `
+                <h3>Отчет за инциденти</h3>
+                <p><strong>Период:</strong> ${new Date().toLocaleDateString('bg-BG')}</p>
+                <p><strong>Общо инциденти:</strong> ${incidents.length}</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #ddd; padding: 8px;">ID</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Заглавие</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Статус</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Приоритет</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Докладчик</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            incidents.forEach(incident => {
+                reportHTML += `
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${incident.id}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${incident.title}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${getStatusText(incident.status)}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${getPriorityText(incident.priority)}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${incident.reporter}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${new Date(incident.date).toLocaleDateString('bg-BG')}</td>
+                    </tr>
+                `;
+            });
+            
+            reportHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('reportResult').innerHTML = reportHTML;
+            addLogEntry('Генериран е отчет за инциденти');
+        }
+        
+        // Функция за сваляне на отчета
+        function downloadReport() {
+            const reportElement = document.getElementById('reportResult');
+            if (!reportElement.innerHTML) {
+                alert('Моля, генерирайте първо отчет!');
+                return;
+            }
+            
+            const reportHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Отчет за инциденти</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                    </style>
+                </head>
+                <body>
+                    ${reportElement.innerHTML}
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([reportHTML], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.download = 'irp-report.html';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            addLogEntry('Отчетът е изтеглен');
+        }
+        
+        // Функция за принтиране на отчета
+        function printReport() {
+            const reportElement = document.getElementById('reportResult');
+            if (!reportElement.innerHTML) {
+                alert('Моля, генерирайте първо отчет!');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Отчет за инциденти</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                    </style>
+                </head>
+                <body>
+                    ${reportElement.innerHTML}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+            addLogEntry('Отчетът е принтиран');
+        }
+        
+        // Симулация на сканиране на QR код
+        function startCamera() {
+            const cameraPreview = document.getElementById('camera-preview');
+            const startBtn = document.getElementById('startCamera');
+            const stopBtn = document.getElementById('stopCamera');
+            const scanResult = document.getElementById('scanResult');
+            
+            cameraPreview.innerHTML = '<p>Симулация на сканиране...</p>';
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            scanResult.innerHTML = '<p>Сканира се QR код...</p>';
+            
+            // Симулиране на сканиране след 2 секунди
+            setTimeout(() => {
+                if (incidents.length > 0) {
+                    const randomIncident = incidents[Math.floor(Math.random() * incidents.length)];
+                    scanResult.innerHTML = `
+                        <p style="color: green;">QR кодът е сканиран успешно!</p>
+                        <p><strong>Инцидент:</strong> ${randomIncident.title}</p>
+                        <p><strong>Статус:</strong> ${getStatusText(randomIncident.status)}</p>
+                        <button class="btn-success" onclick="selectIncident(${randomIncident.id})">Виж детайли</button>
+                    `;
+                    addLogEntry(`Сканиран е QR код за инцидент #${randomIncident.id}`);
+                } else {
+                    scanResult.innerHTML = '<p style="color: orange;">Няма инциденти в системата за сканиране.</p>';
+                }
+            }, 2000);
+        }
+        
+        // Спиране на камерата
+        function stopCamera() {
+            const cameraPreview = document.getElementById('camera-preview');
+            const startBtn = document.getElementById('startCamera');
+            const stopBtn = document.getElementById('stopCamera');
+            const scanResult = document.getElementById('scanResult');
+            
+            cameraPreview.innerHTML = '<p>Камерата ще се активира при натискане на бутона</p>';
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            scanResult.innerHTML = '';
         }
         
         // Обработка на подаването на формуляра
@@ -677,9 +1032,24 @@
             });
         });
         
+        // Добавяне на event listeners за новите бутони
+        document.getElementById('generateQR').addEventListener('click', generateQRCode);
+        document.getElementById('downloadQR').addEventListener('click', downloadQRCode);
+        document.getElementById('printQR').addEventListener('click', printQRCode);
+        document.getElementById('exportData').addEventListener('click', exportData);
+        document.getElementById('importData').addEventListener('click', importData);
+        document.getElementById('clearData').addEventListener('click', clearData);
+        document.getElementById('generateReport').addEventListener('click', generateReport);
+        document.getElementById('downloadReport').addEventListener('click', downloadReport);
+        document.getElementById('printReport').addEventListener('click', printReport);
+        document.getElementById('startCamera').addEventListener('click', startCamera);
+        document.getElementById('stopCamera').addEventListener('click', stopCamera);
+        
         // Инициализация на приложението
         updateStats();
         displayIncidents();
+        updateLogDisplay();
+        addLogEntry('Системата е стартирана');
     </script>
 </body>
 </html>
