@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRP Система - Инцидентно Отчитане</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        h1, h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .incident-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .incident-item {
+            border-left: 4px solid var(--secondary);
+            padding: 12px;
+            margin-bottom: 12px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .incident-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .incident-date {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+        
+        .incident-description {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .incident-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-new {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .status-in-progress {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .status-resolved {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .status-closed {
+            background-color: var(--dark);
+            color: white;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            flex: 1;
+            background-color: var(--light);
+            color: var(--dark);
+            border: 1px solid #ddd;
+            min-width: 60px;
+        }
+        
+        .filter-btn.active {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .no-incidents {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .qr-section {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .qr-code-container {
+            display: inline-block;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 8px 0;
+        }
+        
+        .qr-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1200px;
+            }
+            
+            .main-content {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IRP Система - Инцидентно Отчитане</h1>
+        
+        <div class="main-content">
+            <div class="left-column">
+                <div class="card">
+                    <h2>Докладвай нов инцидент</h2>
+                    <form id="incidentForm">
+                        <div class="form-group">
+                            <label for="title">Заглавие на инцидента</label>
+                            <input type="text" id="title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">Описание</label>
+                            <textarea id="description" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reporter">Докладчик</label>
+                            <input type="text" id="reporter" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="priority">Приоритет</label>
+                            <select id="priority">
+                                <option value="low">Нисък</option>
+                                <option value="medium">Среден</option>
+                                <option value="high">Висок</option>
+                                <option value="critical">Критичен</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit">Докладвай инцидент</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h2>QR код за инцидент</h2>
+                    <div class="qr-section" id="qrSection">
+                        <p>Изберете инцидент от списъка и генерирайте QR код за него</p>
+                        <div class="qr-code-container">
+                            <div id="qrcode"></div>
+                        </div>
+                        <div class="qr-actions">
+                            <button id="downloadQR" class="btn-success" style="display: none;">Свали QR кода</button>
+                            <button id="printQR" class="btn-warning" style="display: none;">Принтирай QR кода</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Статистика</h2>
+                    <div class="stats-grid" id="stats">
+                        <div class="stat-item">
+                            <div>Общо</div>
+                            <div class="stat-value" id="total-incidents">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div>Нови</div>
+                            <div class="stat-value" id="new-incidents">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div>В процес</div>
+                            <div class="stat-value" id="in-progress-incidents">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div>Разрешени</div>
+                            <div class="stat-value" id="resolved-incidents">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="card">
+                    <h2>Списък с инциденти</h2>
+                    
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">Всички</button>
+                        <button class="filter-btn" data-filter="new">Нови</button>
+                        <button class="filter-btn" data-filter="in-progress">В процес</button>
+                        <button class="filter-btn" data-filter="resolved">Разрешени</button>
+                        <button class="filter-btn" data-filter="closed">Приключени</button>
+                    </div>
+                    
+                    <div class="incident-list" id="incidentList">
+                        <div class="no-incidents">Все още няма докладвани инциденти</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация на данните
+        let incidents = JSON.parse(localStorage.getItem('incidents')) || [];
+        let currentFilter = 'all';
+        let selectedIncidentId = null;
+        
+        // Функция за запазване на инцидентите в localStorage
+        function saveIncidents() {
+            localStorage.setItem('incidents', JSON.stringify(incidents));
+            updateStats();
+        }
+        
+        // Функция за обновяване на статистиката
+        function updateStats() {
+            document.getElementById('total-incidents').textContent = incidents.length;
+            document.getElementById('new-incidents').textContent = incidents.filter(i => i.status === 'new').length;
+            document.getElementById('in-progress-incidents').textContent = incidents.filter(i => i.status === 'in-progress').length;
+            document.getElementById('resolved-incidents').textContent = incidents.filter(i => i.status === 'resolved').length;
+        }
+        
+        // Функция за показване на инцидентите
+        function displayIncidents() {
+            const incidentList = document.getElementById('incidentList');
+            
+            // Филтриране на инцидентите
+            let filteredIncidents = incidents;
+            if (currentFilter !== 'all') {
+                filteredIncidents = incidents.filter(incident => incident.status === currentFilter);
+            }
+            
+            if (filteredIncidents.length === 0) {
+                incidentList.innerHTML = '<div class="no-incidents">Няма инциденти, отговарящи на избрания филтър</div>';
+                return;
+            }
+            
+            incidentList.innerHTML = '';
+            
+            filteredIncidents.forEach((incident) => {
+                const incidentElement = document.createElement('div');
+                incidentElement.className = 'incident-item';
+                incidentElement.innerHTML = `
+                    <div class="incident-header">
+                        <div class="incident-title">${incident.title}</div>
+                        <div class="incident-date">${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
+                    </div>
+                    <div class="incident-description">${incident.description}</div>
+                    <div class="incident-footer">
+                        <div>
+                            <span class="status-badge status-${incident.status}">${getStatusText(incident.status)}</span>
+                            <span style="margin-left: 10px; font-size: 12px;">Приоритет: ${getPriorityText(incident.priority)}</span>
+                        </div>
+                        <div class="actions">
+                            <button class="action-btn" onclick="selectIncident(${incident.id})">Избери</button>
+                            ${incident.status === 'new' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'in-progress\')">Започни</button>' : ''}
+                            ${incident.status === 'in-progress' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'resolved\')">Разреши</button>' : ''}
+                            ${incident.status === 'resolved' ? '<button class="action-btn" onclick="updateStatus(' + incident.id + ', \'closed\')">Приключи</button>' : ''}
+                            <button class="action-btn btn-danger" onclick="deleteIncident(${incident.id})">Изтрий</button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 5px; font-size: 12px;">Докладчик: ${incident.reporter}</div>
+                `;
+                incidentList.appendChild(incidentElement);
+            });
+        }
+        
+        // Функция за получаване на текста за статуса
+        function getStatusText(status) {
+            const statusMap = {
+                'new': 'Нов',
+                'in-progress': 'В процес',
+                'resolved': 'Разрешен',
+                'closed': 'Приключен'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // Функция за получаване на текста за приоритета
+        function getPriorityText(priority) {
+            const priorityMap = {
+                'low': 'Нисък',
+                'medium': 'Среден',
+                'high': 'Висок',
+                'critical': 'Критичен'
+            };
+            return priorityMap[priority] || priority;
+        }
+        
+        // Функция за добавяне на нов инцидент
+        function addIncident(title, description, reporter, priority) {
+            const newIncident = {
+                id: incidents.length > 0 ? Math.max(...incidents.map(i => i.id)) + 1 : 1,
+                title,
+                description,
+                reporter,
+                priority,
+                status: 'new',
+                date: new Date().toISOString()
+            };
+            
+            incidents.push(newIncident);
+            saveIncidents();
+            displayIncidents();
+            
+            // Автоматично избиране на новия инцидент
+            selectIncident(newIncident.id);
+        }
+        
+        // Функция за обновяване на статуса на инцидент
+        function updateStatus(id, newStatus) {
+            const incidentIndex = incidents.findIndex(incident => incident.id === id);
+            if (incidentIndex !== -1) {
+                incidents[incidentIndex].status = newStatus;
+                saveIncidents();
+                displayIncidents();
+                
+                // Ако инцидентът е избран, обновяваме QR кода
+                if (selectedIncidentId === id) {
+                    generateQRCode(id);
+                }
+            }
+        }
+        
+        // Функция за изтриване на инцидент
+        function deleteIncident(id) {
+            if (confirm('Сигурни ли сте, че искате да изтриете този инцидент?')) {
+                incidents = incidents.filter(incident => incident.id !== id);
+                saveIncidents();
+                displayIncidents();
+                
+                // Ако изтрития инцидент е бил избран, скриваме QR секцията
+                if (selectedIncidentId === id) {
+                    selectedIncidentId = null;
+                    document.getElementById('qrSection').innerHTML = '<p>Изберете инцидент от списъка и генерирайте QR код за него</p>';
+                    document.getElementById('downloadQR').style.display = 'none';
+                    document.getElementById('printQR').style.display = 'none';
+                }
+            }
+        }
+        
+        // Функция за избор на инцидент за QR код
+        function selectIncident(id) {
+            selectedIncidentId = id;
+            generateQRCode(id);
+        }
+        
+        // Функция за генериране на QR код
+        function generateQRCode(incidentId) {
+            const incident = incidents.find(i => i.id === incidentId);
+            if (!incident) return;
+            
+            const qrData = JSON.stringify({
+                id: incident.id,
+                title: incident.title,
+                description: incident.description,
+                status: incident.status,
+                priority: incident.priority,
+                reporter: incident.reporter,
+                date: incident.date
+            });
+            
+            // Генериране на QR код
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            // Използваме QRCode.toCanvas за генериране на QR кода
+            QRCode.toCanvas(qrContainer, qrData, { 
+                width: 180, 
+                margin: 1,
+                color: {
+                    dark: '#2c3e50',
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if (error) {
+                    console.error('Грешка при генериране на QR код:', error);
+                    qrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
+                    return;
+                }
+                
+                // Показване на информация за инцидента в QR секцията
+                document.getElementById('qrSection').innerHTML = `
+                    <p><strong>${incident.title}</strong></p>
+                    <p>Статус: ${getStatusText(incident.status)}</p>
+                    <div class="qr-code-container">
+                        <div id="qrcode"></div>
+                    </div>
+                    <div class="qr-actions">
+                        <button id="downloadQR" class="btn-success">Свали QR кода</button>
+                        <button id="printQR" class="btn-warning">Принтирай QR кода</button>
+                    </div>
+                `;
+                
+                // Прегенериране на QR кода в новия контейнер
+                const newQrContainer = document.getElementById('qrcode');
+                QRCode.toCanvas(newQrContainer, qrData, { 
+                    width: 180, 
+                    margin: 1,
+                    color: {
+                        dark: '#2c3e50',
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    if (error) {
+                        console.error('Грешка при генериране на QR код:', error);
+                        newQrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
+                        return;
+                    }
+                    
+                    // Добавяне на event listeners за бутоните
+                    document.getElementById('downloadQR').addEventListener('click', function() {
+                        downloadQRCode(incident);
+                    });
+                    
+                    document.getElementById('printQR').addEventListener('click', function() {
+                        printQRCode(incident);
+                    });
+                });
+            });
+        }
+        
+        // Функция за сваляне на QR кода
+        function downloadQRCode(incident) {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                alert('Няма генериран QR код за сваляне');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `incident-${incident.id}-${incident.title.replace(/\s+/g, '-')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Функция за принтиране на QR кода
+        function printQRCode(incident) {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                alert('Няма генериран QR код за принтиране');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>QR код за инцидент: ${incident.title}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+                            h1 { color: #2c3e50; }
+                            .info { margin: 20px 0; }
+                            img { max-width: 100%; height: auto; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Инцидент: ${incident.title}</h1>
+                        <div class="info">
+                            <p><strong>Статус:</strong> ${getStatusText(incident.status)}</p>
+                            <p><strong>Приоритет:</strong> ${getPriorityText(incident.priority)}</p>
+                            <p><strong>Докладчик:</strong> ${incident.reporter}</p>
+                            <p><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</p>
+                        </div>
+                        <img src="${canvas.toDataURL('image/png')}" alt="QR Code">
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(function() { window.close(); }, 500);
+                            };
+                        <\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+        
+        // Обработка на подаването на формуляра
+        document.getElementById('incidentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const reporter = document.getElementById('reporter').value;
+            const priority = document.getElementById('priority').value;
+            
+            addIncident(title, description, reporter, priority);
+            
+            // Нулиране на формуляра
+            this.reset();
+        });
+        
+        // Обработка на филтрите
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.getAttribute('data-filter');
+                displayIncidents();
+            });
+        });
+        
+        // Инициализация на приложението
+        updateStats();
+        displayIncidents();
+    </script>
+</body>
+</html>
