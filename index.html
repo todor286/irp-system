@@ -350,6 +350,67 @@
             border-left: 4px solid var(--success);
         }
         
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .incident-details {
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            width: 120px;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .quick-action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -525,12 +586,30 @@
         </div>
     </div>
 
+    <!-- Модален прозорец за сканиран инцидент -->
+    <div class="modal" id="scannedIncidentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Сканиран инцидент</h2>
+                <span class="close-btn" id="closeScannedModal">&times;</span>
+            </div>
+            <div class="incident-details" id="scannedIncidentDetails">
+                <!-- Детайлите ще се попълнят динамично -->
+            </div>
+            <div class="quick-action-buttons">
+                <button class="btn-success" id="markAsResolved">Маркирай като разрешен</button>
+                <button class="btn-warning" id="markAsClosed">Маркирай като приключен</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Инициализация на данните
         let incidents = JSON.parse(localStorage.getItem('incidents')) || [];
         let currentFilter = 'all';
         let selectedIncidentId = null;
         let systemLog = JSON.parse(localStorage.getItem('systemLog')) || [];
+        let currentScannedIncident = null;
         
         // Функция за записване на лог
         function addLogEntry(message) {
@@ -676,6 +755,11 @@
                 // Ако инцидентът е избран, обновяваме QR кода
                 if (selectedIncidentId === id) {
                     updateSelectedIncidentInfo();
+                }
+                
+                // Ако това е сканирания инцидент, затваряме модала
+                if (currentScannedIncident && currentScannedIncident.id === id) {
+                    closeScannedModal();
                 }
             }
         }
@@ -1051,6 +1135,54 @@
             addLogEntry('Отчетът е принтиран');
         }
         
+        // Функция за показване на сканирания инцидент
+        function showScannedIncident(incident) {
+            currentScannedIncident = incident;
+            const modal = document.getElementById('scannedIncidentModal');
+            const detailsContainer = document.getElementById('scannedIncidentDetails');
+            
+            detailsContainer.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Заглавие:</span>
+                    <span class="detail-value">${incident.title}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Описание:</span>
+                    <span class="detail-value">${incident.description}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Докладчик:</span>
+                    <span class="detail-value">${incident.reporter}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Приоритет:</span>
+                    <span class="detail-value">${getPriorityText(incident.priority)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Статус:</span>
+                    <span class="detail-value">${getStatusText(incident.status)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Дата:</span>
+                    <span class="detail-value">${new Date(incident.date).toLocaleDateString('bg-BG')}</span>
+                </div>
+            `;
+            
+            // Показваме само подходящите бутони според статуса
+            document.getElementById('markAsResolved').style.display = 
+                (incident.status === 'new' || incident.status === 'in-progress') ? 'inline-block' : 'none';
+            document.getElementById('markAsClosed').style.display = 
+                (incident.status === 'resolved') ? 'inline-block' : 'none';
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Функция за затваряне на модала за сканиран инцидент
+        function closeScannedModal() {
+            document.getElementById('scannedIncidentModal').style.display = 'none';
+            currentScannedIncident = null;
+        }
+        
         // Симулация на сканиране на QR код
         function startCamera() {
             const cameraPreview = document.getElementById('camera-preview');
@@ -1071,9 +1203,11 @@
                         <p style="color: green;">QR кодът е сканиран успешно!</p>
                         <p><strong>Инцидент:</strong> ${randomIncident.title}</p>
                         <p><strong>Статус:</strong> ${getStatusText(randomIncident.status)}</p>
-                        <button class="btn-success" onclick="selectIncident(${randomIncident.id})">Виж детайли</button>
                     `;
                     addLogEntry(`Сканиран е QR код за инцидент #${randomIncident.id}`);
+                    
+                    // Показваме модал с детайли за сканирания инцидент
+                    showScannedIncident(randomIncident);
                 } else {
                     scanResult.innerHTML = '<p style="color: orange;">Няма инциденти в системата за сканиране.</p>';
                 }
@@ -1130,6 +1264,25 @@
         document.getElementById('printReport').addEventListener('click', printReport);
         document.getElementById('startCamera').addEventListener('click', startCamera);
         document.getElementById('stopCamera').addEventListener('click', stopCamera);
+        document.getElementById('closeScannedModal').addEventListener('click', closeScannedModal);
+        document.getElementById('markAsResolved').addEventListener('click', function() {
+            if (currentScannedIncident) {
+                updateStatus(currentScannedIncident.id, 'resolved');
+            }
+        });
+        document.getElementById('markAsClosed').addEventListener('click', function() {
+            if (currentScannedIncident) {
+                updateStatus(currentScannedIncident.id, 'closed');
+            }
+        });
+        
+        // Затваряне на модала при клик извън него
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('scannedIncidentModal');
+            if (event.target === modal) {
+                closeScannedModal();
+            }
+        });
         
         // Инициализация на приложението
         updateStats();
