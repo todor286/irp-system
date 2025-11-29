@@ -409,6 +409,7 @@
             gap: 10px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
         
         @media (min-width: 768px) {
@@ -838,8 +839,9 @@
             if (!incident) return;
             
             // Създаваме URL адрес, който директно сочи към този сайт със специален параметър
-            const siteUrl = window.location.href.split('?')[0]; // Вземаме текущия URL без параметри
-            const qrData = `${siteUrl}?scan=true&incident=${incident.id}`;
+            // Използваме текущия URL на страницата
+            const currentUrl = window.location.href.split('?')[0]; // Премахваме съществуващите параметри
+            const qrData = `${currentUrl}?scan=true&incident=${incident.id}`;
             
             // Генериране на QR код
             const qrContainer = document.getElementById('qrcode');
@@ -889,7 +891,7 @@
                 document.getElementById('qrCodeContainer').style.display = 'inline-block';
                 document.getElementById('qrActionButtons').style.display = 'flex';
                 
-                addLogEntry(`Генериран е QR код за инцидент #${incident.id}`);
+                addLogEntry(`Генериран е QR код за инцидент #${incident.id} с URL: ${qrData}`);
             } catch (error) {
                 console.error('Грешка при генериране на QR код:', error);
                 qrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
@@ -1138,6 +1140,10 @@
             
             detailsContainer.innerHTML = `
                 <div class="detail-row">
+                    <span class="detail-label">ID:</span>
+                    <span class="detail-value">${incident.id}</span>
+                </div>
+                <div class="detail-row">
                     <span class="detail-label">Заглавие:</span>
                     <span class="detail-value">${incident.title}</span>
                 </div>
@@ -1247,6 +1253,8 @@
                     // Показваме модала със сканирания инцидент
                     showScannedIncident(incident);
                     addLogEntry(`Автоматично отворен модал за инцидент #${incident.id} от URL параметър`);
+                } else {
+                    addLogEntry(`Опит за отваряне на несъществуващ инцидент #${incidentId} от URL параметър`);
                 }
             }
         }
