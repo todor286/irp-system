@@ -309,6 +309,145 @@
             text-align: center;
         }
         
+        .camera-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        #camera-preview {
+            width: 100%;
+            height: 200px;
+            background-color: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .report-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .selected-incident-info {
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--success);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .incident-details {
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            width: 120px;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .quick-action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .status-change-form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .status-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .status-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .status-option:hover {
+            background-color: #e9ecef;
+        }
+        
+        .status-option.selected {
+            background-color: #d4edda;
+            border-left: 4px solid var(--success);
+        }
+        
+        .status-option input {
+            margin-right: 10px;
+        }
+        
         .mobile-view {
             display: none;
             padding: 20px;
@@ -357,22 +496,6 @@
             display: none;
         }
         
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            text-align: center;
-        }
-        
-        .manual-input {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-        
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -395,6 +518,16 @@
             .data-actions {
                 flex-direction: row;
                 justify-content: space-between;
+            }
+            
+            .status-options {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .status-option {
+                flex: 1;
+                min-width: 120px;
             }
         }
         
@@ -471,12 +604,6 @@
                                 <button id="downloadQR" class="btn-success">Свали QR кода</button>
                                 <button id="printQR" class="btn-warning">Принтирай QR кода</button>
                             </div>
-                            
-                            <div class="manual-input">
-                                <h3>Или въведете ID на инцидент ръчно:</h3>
-                                <input type="number" id="manualIncidentId" placeholder="ID на инцидент">
-                                <button id="loadIncident" class="btn-info">Зареди инцидент</button>
-                            </div>
                         </div>
                     </div>
                     
@@ -484,11 +611,18 @@
                         <h2>Сканиране на QR код</h2>
                         <div class="scan-section">
                             <p>Сканирайте QR код на инцидент за бърз достъп и промяна на статус</p>
-                            <div class="manual-input">
-                                <h3>Въведете ID на инцидент от QR кода:</h3>
-                                <input type="number" id="scanIncidentId" placeholder="ID на инцидент от QR кода">
-                                <button id="processScan" class="btn-success">Обработи сканиране</button>
+                            <div class="camera-container">
+                                <div id="camera-preview">
+                                    <p>Използвайте QR скенер на телефона</p>
+                                </div>
                             </div>
+                            <p><strong>Инструкции:</strong></p>
+                            <ol style="text-align: left; margin-top: 10px;">
+                                <li>Генерирайте QR код за инцидент</li>
+                                <li>Сканирайте QR кода с телефона</li>
+                                <li>Променете статуса на инцидента</li>
+                                <li>Данните ще се актуализират автоматично</li>
+                            </ol>
                         </div>
                     </div>
                     
@@ -546,6 +680,19 @@
                             <div class="no-incidents">Все още няма докладвани инциденти</div>
                         </div>
                     </div>
+                    
+                    <div class="card">
+                        <h2>Отчети</h2>
+                        <div class="report-section">
+                            <p>Генериране на отчети за инциденти</p>
+                            <div class="report-actions">
+                                <button id="generateReport" class="btn-success">Генерирай отчет</button>
+                                <button id="downloadReport" class="btn-info">Свали отчет</button>
+                                <button id="printReport" class="btn-warning">Принтирай отчет</button>
+                            </div>
+                            <div id="reportResult" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -577,19 +724,9 @@
             Статусът е актуализиран успешно!
         </div>
         
-        <div id="errorMessage" class="error-message" style="display: none;">
-            Грешка: Инцидентът не е намерен!
-        </div>
-        
-        <div class="manual-input">
-            <h3>Въведете ID на инцидент:</h3>
-            <input type="number" id="mobileIncidentId" placeholder="ID на инцидент от QR кода">
-            <button id="mobileLoadIncident" class="btn-success">Зареди инцидент</button>
-        </div>
-        
         <div id="mobileNoIncident" class="mobile-incident-info">
             <h2>Няма избран инцидент</h2>
-            <p>Сканирайте QR код на инцидент или въведете ID ръчно, за да промените статуса му.</p>
+            <p>Сканирайте QR код на инцидент, за да промените статуса му.</p>
             <p>QR кодовете се генерират от десктоп версията на системата.</p>
         </div>
     </div>
@@ -601,6 +738,11 @@
         let selectedIncidentId = null;
         let systemLog = JSON.parse(localStorage.getItem('systemLog')) || [];
         let currentScannedIncident = null;
+        
+        // Проверка дали сме на мобилно устройство
+        function isMobileDevice() {
+            return window.innerWidth <= 767;
+        }
         
         // Функция за записване на лог
         function addLogEntry(message) {
@@ -693,7 +835,6 @@
                         </div>
                     </div>
                     <div style="margin-top: 5px; font-size: 12px;">Докладчик: ${incident.reporter}</div>
-                    <div style="margin-top: 5px; font-size: 12px; font-weight: bold;">ID: ${incident.id}</div>
                 `;
                 incidentList.appendChild(incidentElement);
             });
@@ -802,7 +943,6 @@
                     <div>Статус: ${getStatusText(incident.status)}</div>
                     <div>Приоритет: ${getPriorityText(incident.priority)}</div>
                     <div>Докладчик: ${incident.reporter}</div>
-                    <div><strong>ID: ${incident.id}</strong></div>
                 `;
                 
                 document.getElementById('selectedIncidentInfo').style.display = 'block';
@@ -813,9 +953,13 @@
         function showGenerateQRButton() {
             const generateBtn = document.getElementById('generateQR');
             const qrMessage = document.getElementById('qrMessage');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrActionButtons = document.getElementById('qrActionButtons');
             
             if (generateBtn) generateBtn.style.display = 'inline-block';
             if (qrMessage) qrMessage.style.display = 'none';
+            if (qrCodeContainer) qrCodeContainer.style.display = 'none';
+            if (qrActionButtons) qrActionButtons.style.display = 'none';
         }
         
         // Функция за ресетване на QR секцията
@@ -844,8 +988,10 @@
             const incident = incidents.find(i => i.id === selectedIncidentId);
             if (!incident) return;
             
-            // Създаваме QR код само с ID на инцидента
-            const qrData = `IRP-INCIDENT-${incident.id}`;
+            // Създаваме URL адрес, който директно сочи към този сайт със специален параметър
+            // Използваме текущия URL на страницата
+            const currentUrl = window.location.href.split('?')[0]; // Премахваме съществуващите параметри
+            const qrData = `${currentUrl}?mobile=true&incident=${incident.id}`;
             
             // Генериране на QR код
             const qrContainer = document.getElementById('qrcode');
@@ -895,7 +1041,7 @@
                 document.getElementById('qrCodeContainer').style.display = 'inline-block';
                 document.getElementById('qrActionButtons').style.display = 'flex';
                 
-                addLogEntry(`Генериран е QR код за инцидент #${incident.id}`);
+                addLogEntry(`Генериран е QR код за инцидент #${incident.id} с URL: ${qrData}`);
             } catch (error) {
                 console.error('Грешка при генериране на QR код:', error);
                 qrContainer.innerHTML = '<p style="color: red; font-size: 12px;">Грешка при генериране на QR код</p>';
@@ -950,7 +1096,6 @@
                             <p><strong>Приоритет:</strong> ${getPriorityText(incident.priority)}</p>
                             <p><strong>Докладчик:</strong> ${incident.reporter}</p>
                             <p><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</p>
-                            <p><strong>ID:</strong> ${incident.id}</p>
                         </div>
                         <img src="${canvas.toDataURL('image/png')}" alt="QR Code">
                         <script>
@@ -1025,21 +1170,125 @@
             }
         }
         
+        // Функция за генериране на отчет
+        function generateReport() {
+            if (incidents.length === 0) {
+                document.getElementById('reportResult').innerHTML = '<p style="color: orange;">Няма данни за отчет</p>';
+                return;
+            }
+            
+            let reportHTML = `
+                <h3>Отчет за инциденти</h3>
+                <p><strong>Период:</strong> ${new Date().toLocaleDateString('bg-BG')}</p>
+                <p><strong>Общо инциденти:</strong> ${incidents.length}</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #ddd; padding: 8px;">ID</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Заглавие</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Статус</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Приоритет</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Докладчик</th>
+                            <th style="border: 1px solid #ddd; padding: 8px;">Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            incidents.forEach(incident => {
+                reportHTML += `
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${incident.id}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${incident.title}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${getStatusText(incident.status)}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${getPriorityText(incident.priority)}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${incident.reporter}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">${new Date(incident.date).toLocaleDateString('bg-BG')}</td>
+                    </tr>
+                `;
+            });
+            
+            reportHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('reportResult').innerHTML = reportHTML;
+            addLogEntry('Генериран е отчет за инциденти');
+        }
+        
+        // Функция за сваляне на отчета
+        function downloadReport() {
+            const reportElement = document.getElementById('reportResult');
+            if (!reportElement.innerHTML) {
+                alert('Моля, генерирайте първо отчет!');
+                return;
+            }
+            
+            const reportHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Отчет за инциденти</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                    </style>
+                </head>
+                <body>
+                    ${reportElement.innerHTML}
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([reportHTML], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.download = 'irp-report.html';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            addLogEntry('Отчетът е изтеглен');
+        }
+        
+        // Функция за принтиране на отчета
+        function printReport() {
+            const reportElement = document.getElementById('reportResult');
+            if (!reportElement.innerHTML) {
+                alert('Моля, генерирайте първо отчет!');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Отчет за инциденти</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                    </style>
+                </head>
+                <body>
+                    ${reportElement.innerHTML}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+            addLogEntry('Отчетът е принтиран');
+        }
+        
         // Функция за показване на мобилния изглед за инцидент
         function showMobileIncidentView(incidentId) {
             const incident = incidents.find(i => i.id == incidentId);
-            
-            // Скриваме съобщението за грешка
-            document.getElementById('errorMessage').style.display = 'none';
-            
             if (!incident) {
                 document.getElementById('mobileNoIncident').style.display = 'block';
                 document.getElementById('mobileIncidentInfo').style.display = 'none';
                 document.getElementById('mobileStatusForm').style.display = 'none';
-                
-                // Показваме съобщение за грешка
-                document.getElementById('errorMessage').style.display = 'block';
-                document.getElementById('errorMessage').textContent = `Грешка: Инцидент с ID ${incidentId} не беше намерен!`;
                 return;
             }
             
@@ -1052,7 +1301,6 @@
                 <div><strong>Приоритет:</strong> ${getPriorityText(incident.priority)}</div>
                 <div><strong>Текущ статус:</strong> <span class="status-badge status-${incident.status}">${getStatusText(incident.status)}</span></div>
                 <div><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
-                <div><strong>ID:</strong> ${incident.id}</div>
             `;
             
             document.getElementById('mobileNoIncident').style.display = 'none';
@@ -1085,39 +1333,20 @@
             }
         }
         
-        // Функция за обработка на сканиране на QR код
-        function processQRScan(incidentId) {
-            // Проверяваме дали сме на мобилно устройство
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // Функция за проверка на URL параметри при зареждане на страницата
+        function checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mobileParam = urlParams.get('mobile');
+            const incidentId = urlParams.get('incident');
             
-            if (isMobile) {
+            if (mobileParam === 'true' && incidentId) {
                 // Показваме мобилния изглед
                 document.querySelector('.desktop-view').style.display = 'none';
                 document.getElementById('mobileView').style.display = 'block';
                 
                 // Показваме информацията за инцидента
                 showMobileIncidentView(incidentId);
-                addLogEntry(`Обработено сканиране на QR код за инцидент #${incidentId}`);
-            } else {
-                // На десктоп, просто зареждаме инцидента
-                const incident = incidents.find(i => i.id == incidentId);
-                if (incident) {
-                    selectIncident(incident.id);
-                    alert(`Инцидент #${incidentId} е зареден: ${incident.title}`);
-                } else {
-                    alert(`Инцидент с ID ${incidentId} не беше намерен!`);
-                }
-            }
-        }
-        
-        // Функция за ръчно зареждане на инцидент по ID
-        function loadIncidentById(incidentId) {
-            const incident = incidents.find(i => i.id == incidentId);
-            if (incident) {
-                selectIncident(incident.id);
-                alert(`Инцидент #${incidentId} е зареден: ${incident.title}`);
-            } else {
-                alert(`Инцидент с ID ${incidentId} не беше намерен!`);
+                addLogEntry(`Отворен е мобилен изглед за инцидент #${incidentId}`);
             }
         }
         
@@ -1126,6 +1355,7 @@
             updateStats();
             displayIncidents();
             updateLogDisplay();
+            checkUrlParameters(); // Проверяваме за URL параметри при зареждане
             addLogEntry('Системата е стартирана');
             
             // Добавяме event listeners за бутоните в мобилния изглед
@@ -1134,36 +1364,6 @@
                     const newStatus = this.getAttribute('data-status');
                     updateStatusFromMobile(newStatus);
                 });
-            });
-            
-            // Добавяме event listener за ръчно зареждане на инцидент в мобилния изглед
-            document.getElementById('mobileLoadIncident').addEventListener('click', function() {
-                const incidentId = parseInt(document.getElementById('mobileIncidentId').value);
-                if (incidentId) {
-                    processQRScan(incidentId);
-                } else {
-                    alert('Моля, въведете ID на инцидент!');
-                }
-            });
-            
-            // Добавяме event listener за ръчно зареждане на инцидент в десктоп изгледа
-            document.getElementById('loadIncident').addEventListener('click', function() {
-                const incidentId = parseInt(document.getElementById('manualIncidentId').value);
-                if (incidentId) {
-                    loadIncidentById(incidentId);
-                } else {
-                    alert('Моля, въведете ID на инцидент!');
-                }
-            });
-            
-            // Добавяме event listener за обработка на сканиране в десктоп изгледа
-            document.getElementById('processScan').addEventListener('click', function() {
-                const incidentId = parseInt(document.getElementById('scanIncidentId').value);
-                if (incidentId) {
-                    processQRScan(incidentId);
-                } else {
-                    alert('Моля, въведете ID на инцидент от QR кода!');
-                }
             });
         }
         
@@ -1199,6 +1399,9 @@
         document.getElementById('exportData').addEventListener('click', exportData);
         document.getElementById('importData').addEventListener('click', importData);
         document.getElementById('clearData').addEventListener('click', clearData);
+        document.getElementById('generateReport').addEventListener('click', generateReport);
+        document.getElementById('downloadReport').addEventListener('click', downloadReport);
+        document.getElementById('printReport').addEventListener('click', printReport);
         
         // Стартиране на приложението
         initApp();
