@@ -625,15 +625,6 @@
             
             // Показване на избраната страница
             document.getElementById(pageId).classList.add('active');
-            
-            // Специални действия за определени страници
-            if (pageId === 'tasks') {
-                generateTaskQRCode();
-            } else if (pageId === 'materials') {
-                generateMaterialQRCode();
-            } else if (pageId === 'scan') {
-                // Няма да стартираме автоматично сканирането
-            }
         }
         
         // Функции за потребители
@@ -772,14 +763,14 @@
                     name: currentTaskForQR.name
                 });
                 
-                // Генериране на QR код с новата библиотека
-                const typeNumber = 0; // Автоматично определяне
+                // Генериране на QR код
+                const typeNumber = 0;
                 const errorCorrectionLevel = 'L';
                 const qr = qrcode(typeNumber, errorCorrectionLevel);
                 qr.addData(qrData);
                 qr.make();
                 
-                // Създаване на изображение с по-голям размер за по-лесно сканиране
+                // Създаване на изображение
                 const qrImage = qr.createDataURL(10, 0);
                 const img = document.createElement('img');
                 img.src = qrImage;
@@ -893,14 +884,14 @@
                     name: currentMaterialForQR.name
                 });
                 
-                // Генериране на QR код с новата библиотека
-                const typeNumber = 0; // Автоматично определяне
+                // Генериране на QR код
+                const typeNumber = 0;
                 const errorCorrectionLevel = 'L';
                 const qr = qrcode(typeNumber, errorCorrectionLevel);
                 qr.addData(qrData);
                 qr.make();
                 
-                // Създаване на изображение с по-голям размер за по-лесно сканиране
+                // Създаване на изображение
                 const qrImage = qr.createDataURL(10, 0);
                 const img = document.createElement('img');
                 img.src = qrImage;
@@ -923,18 +914,6 @@
         
         // Функции за отчитания
         function createReport(itemId, itemType, itemName) {
-            // Проверка дали вече има отчет за този елемент от текущия потребител
-            const existingReport = reports.find(report => 
-                report.itemId === itemId && 
-                report.userId === currentUser.id &&
-                new Date(report.date).toDateString() === new Date().toDateString()
-            );
-            
-            if (existingReport) {
-                alert('Вече сте отчели тази задача/материал днес!');
-                return existingReport;
-            }
-            
             const report = {
                 id: Date.now().toString(),
                 itemId,
@@ -1126,11 +1105,11 @@
                             loadTasks();
                             loadMaterials();
                             
-                            // Спиране на сканирането след успешно отчитане
+                            // Автоматично прехвърляне към отчетите след 2 секунди
                             setTimeout(() => {
                                 stopScanning();
-                                document.getElementById('scanResult').innerHTML = '';
-                            }, 5000);
+                                showPage('reports');
+                            }, 2000);
                             return;
                         } else {
                             document.getElementById('scanResult').innerHTML = '<div class="error">Невалиден формат на QR кода.</div>';
