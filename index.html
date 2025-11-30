@@ -773,12 +773,25 @@
                 });
                 
                 // Генериране на QR код с новата библиотека
-                const qr = qrcode(0, 'M');
+                const typeNumber = 0; // Автоматично определяне
+                const errorCorrectionLevel = 'L';
+                const qr = qrcode(typeNumber, errorCorrectionLevel);
                 qr.addData(qrData);
                 qr.make();
                 
-                const qrImage = qr.createImgTag(5, 0);
-                qrCodeDiv.innerHTML = qrImage;
+                // Създаване на изображение с по-голям размер за по-лесно сканиране
+                const qrImage = qr.createDataURL(10, 0);
+                const img = document.createElement('img');
+                img.src = qrImage;
+                img.alt = 'QR код за задача: ' + currentTaskForQR.name;
+                qrCodeDiv.appendChild(img);
+                
+                // Добавяне на информация под QR кода
+                const info = document.createElement('p');
+                info.textContent = `Задача: ${currentTaskForQR.name}`;
+                info.style.marginTop = '10px';
+                info.style.fontWeight = 'bold';
+                qrCodeDiv.appendChild(info);
             } else if (tasks.length > 0) {
                 currentTaskForQR = tasks[tasks.length - 1];
                 generateTaskQRCode();
@@ -796,7 +809,7 @@
             // Създаване на списък с задачи за избор
             let taskOptions = 'Изберете задача за QR код:\n';
             tasks.forEach((task, index) => {
-                taskOptions += `${index + 1}. ${task.name}\n`;
+                taskOptions += `${index + 1}. ${task.name} ${task.completed ? '(завършена)' : ''}\n`;
             });
             
             const choice = prompt(taskOptions);
@@ -881,12 +894,25 @@
                 });
                 
                 // Генериране на QR код с новата библиотека
-                const qr = qrcode(0, 'M');
+                const typeNumber = 0; // Автоматично определяне
+                const errorCorrectionLevel = 'L';
+                const qr = qrcode(typeNumber, errorCorrectionLevel);
                 qr.addData(qrData);
                 qr.make();
                 
-                const qrImage = qr.createImgTag(5, 0);
-                qrCodeDiv.innerHTML = qrImage;
+                // Създаване на изображение с по-голям размер за по-лесно сканиране
+                const qrImage = qr.createDataURL(10, 0);
+                const img = document.createElement('img');
+                img.src = qrImage;
+                img.alt = 'QR код за материал: ' + currentMaterialForQR.name;
+                qrCodeDiv.appendChild(img);
+                
+                // Добавяне на информация под QR кода
+                const info = document.createElement('p');
+                info.textContent = `Материал: ${currentMaterialForQR.name}`;
+                info.style.marginTop = '10px';
+                info.style.fontWeight = 'bold';
+                qrCodeDiv.appendChild(info);
             } else if (materials.length > 0) {
                 currentMaterialForQR = materials[materials.length - 1];
                 generateMaterialQRCode();
@@ -897,6 +923,18 @@
         
         // Функции за отчитания
         function createReport(itemId, itemType, itemName) {
+            // Проверка дали вече има отчет за този елемент от текущия потребител
+            const existingReport = reports.find(report => 
+                report.itemId === itemId && 
+                report.userId === currentUser.id &&
+                new Date(report.date).toDateString() === new Date().toDateString()
+            );
+            
+            if (existingReport) {
+                alert('Вече сте отчели тази задача/материал днес!');
+                return existingReport;
+            }
+            
             const report = {
                 id: Date.now().toString(),
                 itemId,
@@ -928,6 +966,10 @@
                 }
             }
             
+            // Презареждане на списъците
+            loadReports();
+            loadRecentReports();
+            
             return report;
         }
         
@@ -935,12 +977,20 @@
             const reportsList = document.getElementById('reportsList');
             reportsList.innerHTML = '';
             
-            reports.forEach(report => {
+            if (reports.length === 0) {
+                reportsList.innerHTML = '<tr><td colspan="5" style="text-align: center;">Няма отчитания</td></tr>';
+                return;
+            }
+            
+            // Сортиране на отчетите от най-нови към най-стари
+            const sortedReports = [...reports].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedReports.forEach(report => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${report.itemName}</td>
                     <td>${report.userName}</td>
-                    <td>${new Date(report.date).toLocaleDateString('bg-BG')}</td>
+                    <td>${new Date(report.date).toLocaleDateString('bg-BG')} ${new Date(report.date).toLocaleTimeString('bg-BG')}</td>
                     <td>${report.itemType === 'task' ? 'Задача' : 'Материал'}</td>
                     <td>${report.status}</td>
                 `;
@@ -954,7 +1004,7 @@
             recentReports.innerHTML = '';
             
             // Вземаме последните 5 отчитания
-            const recent = reports.slice(-5).reverse();
+            const recent = [...reports].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
             
             if (recent.length === 0) {
                 recentReports.innerHTML = '<tr><td colspan="4" style="text-align: center;">Няма отчитания</td></tr>';
@@ -1036,10 +1086,29 @@
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
                 
                 if (code) {
+                    console.log("Открит QR код:", code.data);
+                    
                     try {
                         const data = JSON.parse(code.data);
                         
                         if (data.type && data.id && data.name) {
+                            // Проверка дали задачата/материала съществува
+                            let itemExists = false;
+                            if (data.type === 'task') {
+                                itemExists = tasks.some(task => task.id === data.id);
+                            } else if (data.type === 'material') {
+                                itemExists = materials.some(material => material.id === data.id);
+                            }
+                            
+                            if (!itemExists) {
+                                document.getElementById('scanResult').innerHTML = '<div class="error">Този QR код сочи към несъществуваща задача/материал.</div>';
+                                setTimeout(() => {
+                                    document.getElementById('scanResult').innerHTML = '';
+                                }, 3000);
+                                requestAnimationFrame(scanQRCode);
+                                return;
+                            }
+                            
                             // Създаване на отчет
                             const report = createReport(data.id, data.type, data.name);
                             
@@ -1056,18 +1125,24 @@
                             // Презареждане на списъците
                             loadTasks();
                             loadMaterials();
-                            loadReports();
-                            loadRecentReports();
                             
                             // Спиране на сканирането след успешно отчитане
-                            setTimeout(stopScanning, 3000);
+                            setTimeout(() => {
+                                stopScanning();
+                                document.getElementById('scanResult').innerHTML = '';
+                            }, 5000);
                             return;
+                        } else {
+                            document.getElementById('scanResult').innerHTML = '<div class="error">Невалиден формат на QR кода.</div>';
                         }
                     } catch (e) {
                         console.error("Грешка при обработка на QR кода: ", e);
+                        document.getElementById('scanResult').innerHTML = '<div class="error">Невалиден QR код.</div>';
                     }
                     
-                    document.getElementById('scanResult').innerHTML = '<div class="error">Невалиден QR код.</div>';
+                    setTimeout(() => {
+                        document.getElementById('scanResult').innerHTML = '';
+                    }, 3000);
                 }
             }
             
