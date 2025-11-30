@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
+        /* CSS стилове остават същите като преди */
         * {
             margin: 0;
             padding: 0;
@@ -757,11 +758,8 @@
             qrCodeDiv.innerHTML = '';
             
             if (currentTaskForQR) {
-                const qrData = JSON.stringify({
-                    type: 'task',
-                    id: currentTaskForQR.id,
-                    name: currentTaskForQR.name
-                });
+                // Използваме по-прост формат за QR кода за по-лесно сканиране
+                const qrData = `TASK:${currentTaskForQR.id}:${currentTaskForQR.name}`;
                 
                 // Генериране на QR код
                 const typeNumber = 0;
@@ -775,6 +773,8 @@
                 const img = document.createElement('img');
                 img.src = qrImage;
                 img.alt = 'QR код за задача: ' + currentTaskForQR.name;
+                img.style.width = '200px';
+                img.style.height = '200px';
                 qrCodeDiv.appendChild(img);
                 
                 // Добавяне на информация под QR кода
@@ -783,6 +783,12 @@
                 info.style.marginTop = '10px';
                 info.style.fontWeight = 'bold';
                 qrCodeDiv.appendChild(info);
+                
+                const taskIdInfo = document.createElement('p');
+                taskIdInfo.textContent = `ID: ${currentTaskForQR.id}`;
+                taskIdInfo.style.fontSize = '0.8rem';
+                taskIdInfo.style.color = '#666';
+                qrCodeDiv.appendChild(taskIdInfo);
             } else if (tasks.length > 0) {
                 currentTaskForQR = tasks[tasks.length - 1];
                 generateTaskQRCode();
@@ -878,11 +884,8 @@
             qrCodeDiv.innerHTML = '';
             
             if (currentMaterialForQR) {
-                const qrData = JSON.stringify({
-                    type: 'material',
-                    id: currentMaterialForQR.id,
-                    name: currentMaterialForQR.name
-                });
+                // Използваме по-прост формат за QR кода за по-лесно сканиране
+                const qrData = `MATERIAL:${currentMaterialForQR.id}:${currentMaterialForQR.name}`;
                 
                 // Генериране на QR код
                 const typeNumber = 0;
@@ -896,6 +899,8 @@
                 const img = document.createElement('img');
                 img.src = qrImage;
                 img.alt = 'QR код за материал: ' + currentMaterialForQR.name;
+                img.style.width = '200px';
+                img.style.height = '200px';
                 qrCodeDiv.appendChild(img);
                 
                 // Добавяне на информация под QR кода
@@ -904,6 +909,12 @@
                 info.style.marginTop = '10px';
                 info.style.fontWeight = 'bold';
                 qrCodeDiv.appendChild(info);
+                
+                const materialIdInfo = document.createElement('p');
+                materialIdInfo.textContent = `ID: ${currentMaterialForQR.id}`;
+                materialIdInfo.style.fontSize = '0.8rem';
+                materialIdInfo.style.color = '#666';
+                qrCodeDiv.appendChild(materialIdInfo);
             } else if (materials.length > 0) {
                 currentMaterialForQR = materials[materials.length - 1];
                 generateMaterialQRCode();
@@ -1067,66 +1078,119 @@
                 if (code) {
                     console.log("Открит QR код:", code.data);
                     
-                    try {
-                        const data = JSON.parse(code.data);
-                        
-                        if (data.type && data.id && data.name) {
-                            // Проверка дали задачата/материала съществува
-                            let itemExists = false;
-                            if (data.type === 'task') {
-                                itemExists = tasks.some(task => task.id === data.id);
-                            } else if (data.type === 'material') {
-                                itemExists = materials.some(material => material.id === data.id);
-                            }
-                            
-                            if (!itemExists) {
-                                document.getElementById('scanResult').innerHTML = '<div class="error">Този QR код сочи към несъществуваща задача/материал.</div>';
-                                setTimeout(() => {
-                                    document.getElementById('scanResult').innerHTML = '';
-                                }, 3000);
-                                requestAnimationFrame(scanQRCode);
-                                return;
-                            }
-                            
-                            // Създаване на отчет
-                            const report = createReport(data.id, data.type, data.name);
-                            
-                            // Показване на резултата
-                            document.getElementById('scanResult').innerHTML = `
-                                <div class="success">
-                                    <h3>Успешно отчитане!</h3>
-                                    <p><strong>${data.type === 'task' ? 'Задача' : 'Материал'}:</strong> ${data.name}</p>
-                                    <p><strong>Потребител:</strong> ${currentUser.name}</p>
-                                    <p><strong>Дата:</strong> ${new Date().toLocaleString('bg-BG')}</p>
-                                </div>
-                            `;
-                            
-                            // Презареждане на списъците
-                            loadTasks();
-                            loadMaterials();
-                            
-                            // Автоматично прехвърляне към отчетите след 2 секунди
-                            setTimeout(() => {
-                                stopScanning();
-                                showPage('reports');
-                            }, 2000);
-                            return;
-                        } else {
-                            document.getElementById('scanResult').innerHTML = '<div class="error">Невалиден формат на QR кода.</div>';
-                        }
-                    } catch (e) {
-                        console.error("Грешка при обработка на QR кода: ", e);
-                        document.getElementById('scanResult').innerHTML = '<div class="error">Невалиден QR код.</div>';
-                    }
-                    
-                    setTimeout(() => {
-                        document.getElementById('scanResult').innerHTML = '';
-                    }, 3000);
+                    // Обработка на прочетения QR код
+                    processScannedQRCode(code.data);
                 }
             }
             
             // Продължаване на сканирането
             requestAnimationFrame(scanQRCode);
+        }
+        
+        function processScannedQRCode(qrData) {
+            try {
+                // Опитваме се да обработим QR кода като прост текст формат
+                if (qrData.includes('TASK:') || qrData.includes('MATERIAL:')) {
+                    const parts = qrData.split(':');
+                    if (parts.length >= 3) {
+                        const type = parts[0] === 'TASK' ? 'task' : 'material';
+                        const id = parts[1];
+                        const name = parts.slice(2).join(':'); // В случай, че името съдържа ':'
+                        
+                        // Проверка дали задачата/материала съществува
+                        let itemExists = false;
+                        if (type === 'task') {
+                            itemExists = tasks.some(task => task.id === id);
+                        } else if (type === 'material') {
+                            itemExists = materials.some(material => material.id === id);
+                        }
+                        
+                        if (!itemExists) {
+                            document.getElementById('scanResult').innerHTML = '<div class="error">Този QR код сочи към несъществуваща задача/материал.</div>';
+                            setTimeout(() => {
+                                document.getElementById('scanResult').innerHTML = '';
+                            }, 3000);
+                            return;
+                        }
+                        
+                        // Създаване на отчет
+                        const report = createReport(id, type, name);
+                        
+                        // Показване на резултата
+                        document.getElementById('scanResult').innerHTML = `
+                            <div class="success">
+                                <h3>Успешно отчитане!</h3>
+                                <p><strong>${type === 'task' ? 'Задача' : 'Материал'}:</strong> ${name}</p>
+                                <p><strong>Потребител:</strong> ${currentUser.name}</p>
+                                <p><strong>Дата:</strong> ${new Date().toLocaleString('bg-BG')}</p>
+                            </div>
+                        `;
+                        
+                        // Презареждане на списъците
+                        loadTasks();
+                        loadMaterials();
+                        
+                        // Автоматично прехвърляне към отчетите след 2 секунди
+                        setTimeout(() => {
+                            stopScanning();
+                            showPage('reports');
+                        }, 2000);
+                        return;
+                    }
+                } else {
+                    // Опитваме се да обработим като JSON (за обратна съвместимост)
+                    const data = JSON.parse(qrData);
+                    
+                    if (data.type && data.id && data.name) {
+                        // Проверка дали задачата/материала съществува
+                        let itemExists = false;
+                        if (data.type === 'task') {
+                            itemExists = tasks.some(task => task.id === data.id);
+                        } else if (data.type === 'material') {
+                            itemExists = materials.some(material => material.id === data.id);
+                        }
+                        
+                        if (!itemExists) {
+                            document.getElementById('scanResult').innerHTML = '<div class="error">Този QR код сочи към несъществуваща задача/материал.</div>';
+                            setTimeout(() => {
+                                document.getElementById('scanResult').innerHTML = '';
+                            }, 3000);
+                            return;
+                        }
+                        
+                        // Създаване на отчет
+                        const report = createReport(data.id, data.type, data.name);
+                        
+                        // Показване на резултата
+                        document.getElementById('scanResult').innerHTML = `
+                            <div class="success">
+                                <h3>Успешно отчитане!</h3>
+                                <p><strong>${data.type === 'task' ? 'Задача' : 'Материал'}:</strong> ${data.name}</p>
+                                <p><strong>Потребител:</strong> ${currentUser.name}</p>
+                                <p><strong>Дата:</strong> ${new Date().toLocaleString('bg-BG')}</p>
+                            </div>
+                        `;
+                        
+                        // Презареждане на списъците
+                        loadTasks();
+                        loadMaterials();
+                        
+                        // Автоматично прехвърляне към отчетите след 2 секунди
+                        setTimeout(() => {
+                            stopScanning();
+                            showPage('reports');
+                        }, 2000);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error("Грешка при обработка на QR кода: ", e);
+                document.getElementById('scanResult').innerHTML = '<div class="error">Невалиден QR код.</div>';
+            }
+            
+            setTimeout(() => {
+                document.getElementById('scanResult').innerHTML = '';
+            }, 3000);
         }
         
         // Обработка на формите
