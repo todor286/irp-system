@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        /* CSS стилове остават същите като преди */
         * {
             margin: 0;
             padding: 0;
@@ -159,6 +158,14 @@
             background: #27ae60;
         }
         
+        .btn-warning {
+            background: #f39c12;
+        }
+        
+        .btn-warning:hover {
+            background: #d35400;
+        }
+        
         .qr-container {
             text-align: center;
             margin: 20px 0;
@@ -304,11 +311,18 @@
             margin-top: 15px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .task-actions button {
             padding: 8px 12px;
             font-size: 0.9rem;
+        }
+        
+        .task-creator {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 10px;
         }
         
         @media (max-width: 768px) {
@@ -344,7 +358,7 @@
 <body>
     <header>
         <div class="container header-content">
-            <div class="logo">WorkTrack</div>
+            <div class="logo">WorkTrack - Обща система</div>
             <nav>
                 <ul>
                     <li><a href="#" onclick="showPage('home')">Начало</a></li>
@@ -370,8 +384,8 @@
         <!-- Начална страница -->
         <div id="home" class="page active">
             <div class="card">
-                <h2>Добре дошли в WorkTrack</h2>
-                <p>Система за отчитане на работа чрез QR кодове. Създавайте задачи и материали, генерирайте QR кодове и отчитайте работата чрез сканиране с телефон.</p>
+                <h2>Добре дошли в общата система WorkTrack</h2>
+                <p>Система за отчитане на работа чрез QR кодове. Всички потребители виждат едни и същи задачи, материали и отчети.</p>
                 
                 <div class="flex" style="margin-top: 30px;">
                     <div style="flex: 1; padding: 15px;">
@@ -479,7 +493,7 @@
             </div>
             
             <div class="card">
-                <h2>Списък с задачи</h2>
+                <h2>Общ списък с задачи</h2>
                 <div class="task-list" id="taskList">
                     <!-- Задачите ще се добавят тук -->
                 </div>
@@ -515,13 +529,14 @@
             </div>
             
             <div class="card">
-                <h2>Списък с материали</h2>
+                <h2>Общ списък с материали</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>Материал</th>
                             <th>Количество</th>
                             <th>Описание</th>
+                            <th>Създал</th>
                             <th>Статус</th>
                             <th>Действия</th>
                         </tr>
@@ -536,7 +551,10 @@
         <!-- Отчитания -->
         <div id="reports" class="page">
             <div class="card">
-                <h2>Отчитания на работа</h2>
+                <h2>Общи отчитания на работа</h2>
+                <div style="margin-bottom: 15px;">
+                    <button onclick="clearAllReports()" class="btn-danger">Изтрий всички отчети</button>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -634,7 +652,7 @@
                 id: Date.now().toString(),
                 name,
                 email,
-                password, // В реално приложение паролата трябва да е хеширана
+                password,
                 avatar: name.charAt(0).toUpperCase()
             };
             
@@ -677,7 +695,8 @@
                 materials: materialsList.split(',').map(m => m.trim()),
                 completed: false,
                 createdAt: new Date().toISOString(),
-                createdBy: currentUser ? currentUser.id : 'anonymous'
+                createdBy: currentUser ? currentUser.name : 'Анонимен',
+                createdById: currentUser ? currentUser.id : 'anonymous'
             };
             
             tasks.push(task);
@@ -708,6 +727,23 @@
             }
         }
         
+        function resetTask(taskId) {
+            if (confirm('Сигурни ли сте, че искате да нулирате тази задача?')) {
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = false;
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    loadTasks();
+                    
+                    // Премахване на отчетите за тази задача
+                    reports = reports.filter(report => report.itemId !== taskId);
+                    localStorage.setItem('reports', JSON.stringify(reports));
+                    loadReports();
+                    loadRecentReports();
+                }
+            }
+        }
+        
         function markTaskAsCompleted(taskId) {
             const task = tasks.find(t => t.id === taskId);
             if (task) {
@@ -731,7 +767,10 @@
                 return;
             }
             
-            tasks.forEach(task => {
+            // Сортиране на задачите по дата на създаване (най-новите първи)
+            const sortedTasks = [...tasks].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            sortedTasks.forEach(task => {
                 const taskCard = document.createElement('div');
                 taskCard.className = 'task-card';
                 
@@ -743,8 +782,10 @@
                     <div class="task-materials">Материали: ${task.materials.join(', ')}</div>
                     <div class="task-description">${task.description}</div>
                     <div class="task-status ${statusClass}">${statusText}</div>
+                    <div class="task-creator">Създадена от: ${task.createdBy}</div>
                     <div class="task-actions">
                         <button class="btn-success" onclick="markTaskAsCompleted('${task.id}')">Отбележи като завършена</button>
+                        <button class="btn-warning" onclick="resetTask('${task.id}')">Нулирай задача</button>
                         <button class="btn-danger" onclick="deleteTask('${task.id}')">Изтрий</button>
                     </div>
                 `;
@@ -758,7 +799,6 @@
             qrCodeDiv.innerHTML = '';
             
             if (currentTaskForQR) {
-                // Използваме по-прост формат за QR кода за по-лесно сканиране
                 const qrData = `TASK:${currentTaskForQR.id}:${currentTaskForQR.name}`;
                 
                 // Генериране на QR код
@@ -825,7 +865,8 @@
                 description,
                 used: false,
                 createdAt: new Date().toISOString(),
-                createdBy: currentUser ? currentUser.id : 'anonymous'
+                createdBy: currentUser ? currentUser.name : 'Анонимен',
+                createdById: currentUser ? currentUser.id : 'anonymous'
             };
             
             materials.push(material);
@@ -856,11 +897,36 @@
             }
         }
         
+        function resetMaterial(materialId) {
+            if (confirm('Сигурни ли сте, че искате да нулирате този материал?')) {
+                const material = materials.find(m => m.id === materialId);
+                if (material) {
+                    material.used = false;
+                    localStorage.setItem('materials', JSON.stringify(materials));
+                    loadMaterials();
+                    
+                    // Премахване на отчетите за този материал
+                    reports = reports.filter(report => report.itemId !== materialId);
+                    localStorage.setItem('reports', JSON.stringify(reports));
+                    loadReports();
+                    loadRecentReports();
+                }
+            }
+        }
+        
         function loadMaterials() {
             const materialList = document.getElementById('materialList');
             materialList.innerHTML = '';
             
-            materials.forEach(material => {
+            if (materials.length === 0) {
+                materialList.innerHTML = '<tr><td colspan="6" style="text-align: center;">Няма създадени материали.</td></tr>';
+                return;
+            }
+            
+            // Сортиране на материалите по дата на създаване (най-новите първи)
+            const sortedMaterials = [...materials].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            sortedMaterials.forEach(material => {
                 const statusClass = material.used ? 'status-completed' : 'status-pending';
                 const statusText = material.used ? 'Използван' : 'Наличен';
                 
@@ -869,8 +935,10 @@
                     <td>${material.name}</td>
                     <td>${material.quantity}</td>
                     <td>${material.description}</td>
+                    <td>${material.createdBy}</td>
                     <td><span class="task-status ${statusClass}">${statusText}</span></td>
                     <td>
+                        <button class="btn-warning" onclick="resetMaterial('${material.id}')">Нулирай</button>
                         <button class="btn-danger" onclick="deleteMaterial('${material.id}')">Изтрий</button>
                     </td>
                 `;
@@ -884,7 +952,6 @@
             qrCodeDiv.innerHTML = '';
             
             if (currentMaterialForQR) {
-                // Използваме по-прост формат за QR кода за по-лесно сканиране
                 const qrData = `MATERIAL:${currentMaterialForQR.id}:${currentMaterialForQR.name}`;
                 
                 // Генериране на QR код
@@ -961,6 +1028,15 @@
             loadRecentReports();
             
             return report;
+        }
+        
+        function clearAllReports() {
+            if (confirm('Сигурни ли сте, че искате да изтриете ВСИЧКИ отчети? Това действие не може да бъде отменено!')) {
+                reports = [];
+                localStorage.setItem('reports', JSON.stringify(reports));
+                loadReports();
+                loadRecentReports();
+            }
         }
         
         function loadReports() {
@@ -1278,3 +1354,4 @@
     </script>
 </body>
 </html>
+
