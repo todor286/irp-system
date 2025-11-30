@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IRP Pro | Инцидентно Отчитане</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>IRP Система - Инцидентно Отчитане</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -13,179 +13,90 @@
             --success: #27ae60;
             --warning: #f39c12;
             --danger: #e74c3c;
-            --light: #f8f9fa;
-            --dark: #343a40;
-            --gray: #6c757d;
-            --border: #dee2e6;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --radius: 8px;
+            --light: #ecf0f1;
+            --dark: #34495e;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-color: #f5f7fa;
             color: var(--dark);
             line-height: 1.6;
-            min-height: 100vh;
-            padding: 0;
+            padding: 10px;
         }
         
-        .app-container {
-            max-width: 1400px;
+        .container {
+            max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .logo-icon {
-            background: var(--primary);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
-        .logo-text h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-        
-        .logo-text p {
-            font-size: 14px;
-            color: var(--gray);
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 992px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
         }
         
         .card {
             background-color: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
         }
         
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
+        h1, h2, h3 {
             color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .card-title i {
-            color: var(--secondary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
-            color: var(--dark);
         }
         
         input, select, textarea {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-size: 16px;
-            transition: border 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
         
         textarea {
-            min-height: 120px;
+            min-height: 80px;
             resize: vertical;
         }
         
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+        button {
             background-color: var(--secondary);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: var(--radius);
+            padding: 10px 15px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
+            transition: background-color 0.3s;
+            margin: 5px;
         }
         
-        .btn:hover {
+        button:hover {
             background-color: #2980b9;
-            transform: translateY(-2px);
         }
         
-        .btn-block {
-            width: 100%;
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
         }
         
         .btn-success {
@@ -204,74 +115,53 @@
             background-color: #e67e22;
         }
         
-        .btn-danger {
-            background-color: var(--danger);
+        .btn-info {
+            background-color: #17a2b8;
         }
         
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--secondary);
-            color: var(--secondary);
-        }
-        
-        .btn-outline:hover {
-            background-color: var(--secondary);
-            color: white;
+        .btn-info:hover {
+            background-color: #138496;
         }
         
         .incident-list {
-            max-height: 600px;
+            max-height: 500px;
             overflow-y: auto;
         }
         
         .incident-item {
             border-left: 4px solid var(--secondary);
-            padding: 20px;
-            margin-bottom: 15px;
-            background-color: var(--light);
-            border-radius: var(--radius);
+            padding: 12px;
+            margin-bottom: 12px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
             transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .incident-item:hover {
-            transform: translateX(5px);
-            box-shadow: var(--shadow);
         }
         
         .incident-item.selected {
             border-left: 4px solid var(--success);
-            background-color: rgba(39, 174, 96, 0.05);
+            background-color: #e8f5e8;
         }
         
         .incident-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
+            align-items: center;
+            margin-bottom: 8px;
         }
         
         .incident-title {
             font-weight: bold;
             font-size: 16px;
-            color: var(--primary);
-            margin-bottom: 5px;
         }
         
         .incident-date {
-            color: var(--gray);
-            font-size: 13px;
+            color: #7f8c8d;
+            font-size: 12px;
         }
         
         .incident-description {
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             font-size: 14px;
-            color: var(--dark);
-            line-height: 1.5;
         }
         
         .incident-footer {
@@ -279,17 +169,13 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
         }
         
         .status-badge {
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
         }
         
         .status-new {
@@ -312,37 +198,10 @@
             color: white;
         }
         
-        .priority-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        
-        .priority-low {
-            background-color: #e8f5e8;
-            color: var(--success);
-        }
-        
-        .priority-medium {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
-        .priority-high {
-            background-color: #f8d7da;
-            color: var(--danger);
-        }
-        
-        .priority-critical {
-            background-color: var(--danger);
-            color: white;
-        }
-        
         .filters {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 5px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
         }
         
@@ -350,247 +209,419 @@
             flex: 1;
             background-color: var(--light);
             color: var(--dark);
-            border: 1px solid var(--border);
-            min-width: 80px;
-            padding: 10px 15px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-weight: 500;
+            border: 1px solid #ddd;
+            min-width: 60px;
         }
         
         .filter-btn.active {
             background-color: var(--secondary);
             color: white;
-            border-color: var(--secondary);
         }
         
         .no-incidents {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--gray);
-        }
-        
-        .no-incidents i {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: var(--border);
+            padding: 20px;
+            color: #7f8c8d;
         }
         
         .actions {
             display: flex;
-            gap: 8px;
+            gap: 5px;
             flex-wrap: wrap;
         }
         
         .action-btn {
-            padding: 6px 12px;
+            padding: 4px 8px;
             font-size: 12px;
-            border-radius: 4px;
         }
         
         .qr-section {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
         }
         
         .qr-code-container {
             display: inline-block;
-            padding: 20px;
+            padding: 10px;
             background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 8px 0;
         }
         
         .qr-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 12px;
             flex-wrap: wrap;
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 10px;
         }
         
         .stat-item {
             text-align: center;
-            padding: 15px;
-            background: var(--light);
-            border-radius: var(--radius);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-item:hover {
-            transform: translateY(-5px);
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
         }
         
         .stat-value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             color: var(--primary);
-            margin: 10px 0;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: var(--gray);
         }
         
         .data-management {
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .data-actions {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-        }
-        
-        .log-section {
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            background: var(--light);
-            padding: 15px;
-            border-radius: var(--radius);
-            font-size: 13px;
-        }
-        
-        .log-entry {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
             gap: 10px;
         }
         
-        .log-time {
-            font-weight: 600;
-            color: var(--primary);
-            min-width: 70px;
+        .log-section {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
         }
         
-        .log-message {
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .scan-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .camera-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        #camera-preview {
+            width: 100%;
+            height: 300px;
+            background-color: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #camera-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .report-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .selected-incident-info {
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--success);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .incident-details {
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            width: 120px;
+        }
+        
+        .detail-value {
             flex: 1;
+        }
+        
+        .quick-action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .status-change-form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .status-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .status-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .status-option:hover {
+            background-color: #e9ecef;
+        }
+        
+        .status-option.selected {
+            background-color: #d4edda;
+            border-left: 4px solid var(--success);
+        }
+        
+        .status-option input {
+            margin-right: 10px;
         }
         
         .mobile-view {
             display: none;
             padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
         }
         
         .mobile-header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light);
         }
         
         .mobile-incident-info {
             background-color: white;
-            border-radius: var(--radius);
-            padding: 25px;
+            border-radius: 8px;
+            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .mobile-status-form {
             background-color: white;
-            border-radius: var(--radius);
-            padding: 25px;
-            box-shadow: var(--shadow);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .status-btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: block;
             width: 100%;
-            padding: 15px 20px;
+            padding: 15px;
             margin: 10px 0;
-            text-align: left;
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .status-btn i {
-            font-size: 20px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
         }
         
         .success-message {
             background-color: #d4edda;
             color: #155724;
             padding: 15px;
-            border-radius: var(--radius);
-            margin: 20px 0;
+            border-radius: 8px;
+            margin: 15px 0;
             text-align: center;
             display: none;
-            animation: fadeIn 0.5s ease;
         }
         
         .error-message {
             background-color: #f8d7da;
             color: #721c24;
             padding: 15px;
-            border-radius: var(--radius);
-            margin: 20px 0;
+            border-radius: 8px;
+            margin: 15px 0;
             text-align: center;
-            display: none;
         }
         
-        .manual-input {
+        .user-section {
             margin-top: 20px;
-            padding: 20px;
-            background-color: var(--light);
-            border-radius: var(--radius);
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
         }
         
-        .scan-instructions {
-            background: white;
-            padding: 20px;
-            border-radius: var(--radius);
-            margin-top: 20px;
-            box-shadow: var(--shadow);
-        }
-        
-        .instruction-step {
+        .user-form {
             display: flex;
-            align-items: flex-start;
-            gap: 15px;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .user-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .user-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .user-admin {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .user-operator {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .user-viewer {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .login-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-radius: 4px;
             margin-bottom: 15px;
         }
         
-        .step-number {
-            background: var(--secondary);
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1200px;
+            }
+            
+            .main-content {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .data-actions {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            .status-options {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .status-option {
+                flex: 1;
+                min-width: 120px;
+            }
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
             .desktop-view {
                 display: none;
             }
@@ -598,241 +629,178 @@
             .mobile-view {
                 display: block;
             }
-            
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .filters {
-                flex-direction: column;
-            }
-            
-            .incident-footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .actions {
-                width: 100%;
-                justify-content: space-between;
-            }
         }
     </style>
 </head>
 <body>
     <!-- Desktop View -->
     <div class="desktop-view">
-        <div class="app-container">
-            <div class="header">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="logo-text">
-                        <h1>IRP Pro System</h1>
-                        <p>Професионална система за инцидентно отчитане</p>
-                    </div>
+        <div class="container">
+            <h1>IRP Система - Инцидентно Отчитане</h1>
+            
+            <div class="user-section">
+                <h2>Управление на потребители</h2>
+                <div class="user-form">
+                    <input type="text" id="username" placeholder="Потребителско име">
+                    <input type="password" id="password" placeholder="Парола">
+                    <select id="userRole">
+                        <option value="viewer">Преглед</option>
+                        <option value="operator">Оператор</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                    <button id="addUser" class="btn-success">Добави потребител</button>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-outline" id="refreshData">
-                        <i class="fas fa-sync-alt"></i> Обнови
-                    </button>
+                <div class="user-list" id="userList">
+                    <!-- Users will be listed here -->
                 </div>
             </div>
             
-            <div class="main-content">
-                <div class="left-column">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-plus-circle"></i> Докладвай нов инцидент
-                            </h2>
-                        </div>
-                        <form id="incidentForm">
-                            <div class="form-group">
-                                <label for="title">Заглавие на инцидента</label>
-                                <input type="text" id="title" placeholder="Въведете заглавие" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="description">Описание</label>
-                                <textarea id="description" placeholder="Опишете инцидента подробно" required></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="reporter">Докладчик</label>
-                                <input type="text" id="reporter" placeholder="Вашето име" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="priority">Приоритет</label>
-                                <select id="priority">
-                                    <option value="low">Нисък</option>
-                                    <option value="medium">Среден</option>
-                                    <option value="high">Висок</option>
-                                    <option value="critical">Критичен</option>
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-success btn-block">
-                                <i class="fas fa-paper-plane"></i> Докладвай инцидент
-                            </button>
-                        </form>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-qrcode"></i> QR код за инцидент
-                            </h2>
-                        </div>
-                        <div class="qr-section" id="qrSection">
-                            <p id="qrMessage">Изберете инцидент от списъка и генерирайте QR код</p>
-                            
-                            <div id="selectedIncidentInfo" class="selected-incident-info" style="display: none;">
-                                <strong>Избран инцидент:</strong>
-                                <div id="selectedIncidentDetails"></div>
-                            </div>
-                            
-                            <div class="qr-actions">
-                                <button id="generateQR" class="btn btn-success" style="display: none;">
-                                    <i class="fas fa-barcode"></i> Генерирай QR код
-                                </button>
-                            </div>
-                            
-                            <div class="qr-code-container" id="qrCodeContainer" style="display: none;">
-                                <div id="qrcode"></div>
-                            </div>
-                            
-                            <div class="qr-actions" id="qrActionButtons" style="display: none;">
-                                <button id="downloadQR" class="btn btn-success">
-                                    <i class="fas fa-download"></i> Свали QR кода
-                                </button>
-                                <button id="printQR" class="btn btn-warning">
-                                    <i class="fas fa-print"></i> Принтирай
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-mobile-alt"></i> Мобилен достъп
-                            </h2>
-                        </div>
-                        <div class="scan-instructions">
-                            <h3>Инструкции за сканиране:</h3>
-                            <div class="instruction-step">
-                                <div class="step-number">1</div>
-                                <div class="step-text">Генерирайте QR код за инцидент от системата</div>
-                            </div>
-                            <div class="instruction-step">
-                                <div class="step-number">2</div>
-                                <div class="step-text">Сканирайте QR кода с камерата на телефона</div>
-                            </div>
-                            <div class="instruction-step">
-                                <div class="step-number">3</div>
-                                <div class="step-text">Въведете ID на инцидента в мобилния интерфейс</div>
-                            </div>
-                            <div class="instruction-step">
-                                <div class="step-number">4</div>
-                                <div class="step-text">Променете статуса на инцидента</div>
-                            </div>
-                        </div>
-                        <div class="manual-input">
-                            <h3>Ръчно въвеждане на ID:</h3>
-                            <div class="form-group">
-                                <input type="number" id="scanIncidentId" placeholder="ID на инцидент от QR кода">
-                            </div>
-                            <button id="processScan" class="btn btn-success btn-block">
-                                <i class="fas fa-search"></i> Зареди инцидент
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-chart-bar"></i> Статистика
-                            </h2>
-                        </div>
-                        <div class="stats-grid" id="stats">
-                            <div class="stat-item">
-                                <div class="stat-label">Общо инциденти</div>
-                                <div class="stat-value" id="total-incidents">0</div>
-                                <i class="fas fa-clipboard-list fa-2x" style="color: #3498db;"></i>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Нови</div>
-                                <div class="stat-value" id="new-incidents">0</div>
-                                <i class="fas fa-plus-circle fa-2x" style="color: #3498db;"></i>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">В процес</div>
-                                <div class="stat-value" id="in-progress-incidents">0</div>
-                                <i class="fas fa-spinner fa-2x" style="color: #f39c12;"></i>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Разрешени</div>
-                                <div class="stat-value" id="resolved-incidents">0</div>
-                                <i class="fas fa-check-circle fa-2x" style="color: #27ae60;"></i>
-                            </div>
-                        </div>
-                    </div>
+            <div class="login-section" id="loginSection">
+                <h2>Вход в системата</h2>
+                <div class="form-group">
+                    <input type="text" id="loginUsername" placeholder="Потребителско име">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Парола">
+                </div>
+                <button id="loginBtn" class="btn-success">Вход</button>
+            </div>
+            
+            <div id="mainApp" style="display: none;">
+                <div class="user-info">
+                    <span>Влезли сте като: <strong id="currentUser"></strong></span>
+                    <button id="logoutBtn" class="btn-danger">Изход</button>
                 </div>
                 
-                <div class="right-column">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-list-ul"></i> Списък с инциденти
-                            </h2>
-                            <div class="incident-count">
-                                <span id="incidentCount">0 инцидента</span>
+                <div class="main-content">
+                    <div class="left-column">
+                        <div class="card">
+                            <h2>Докладвай нов инцидент</h2>
+                            <form id="incidentForm">
+                                <div class="form-group">
+                                    <label for="title">Заглавие на инцидента</label>
+                                    <input type="text" id="title" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="description">Описание</label>
+                                    <textarea id="description" required></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="reporter">Докладчик</label>
+                                    <input type="text" id="reporter" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="priority">Приоритет</label>
+                                    <select id="priority">
+                                        <option value="low">Нисък</option>
+                                        <option value="medium">Среден</option>
+                                        <option value="high">Висок</option>
+                                        <option value="critical">Критичен</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit">Докладвай инцидент</button>
+                            </form>
+                        </div>
+                        
+                        <div class="card">
+                            <h2>QR код за инцидент</h2>
+                            <div class="qr-section" id="qrSection">
+                                <p id="qrMessage">Изберете инцидент от списъка и генерирайте QR код за него</p>
+                                
+                                <div id="selectedIncidentInfo" class="selected-incident-info" style="display: none;">
+                                    <strong>Избран инцидент:</strong>
+                                    <div id="selectedIncidentDetails"></div>
+                                </div>
+                                
+                                <div class="qr-actions">
+                                    <button id="generateQR" class="btn-success" style="display: none;">Генерирай QR код</button>
+                                </div>
+                                
+                                <div class="qr-code-container" id="qrCodeContainer" style="display: none;">
+                                    <div id="qrcode"></div>
+                                </div>
+                                
+                                <div class="qr-actions" id="qrActionButtons" style="display: none;">
+                                    <button id="downloadQR" class="btn-success">Свали QR кода</button>
+                                    <button id="printQR" class="btn-warning">Принтирай QR кода</button>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="filters">
-                            <button class="filter-btn active" data-filter="all">Всички</button>
-                            <button class="filter-btn" data-filter="new">Нови</button>
-                            <button class="filter-btn" data-filter="in-progress">В процес</button>
-                            <button class="filter-btn" data-filter="resolved">Разрешени</button>
-                            <button class="filter-btn" data-filter="closed">Приключени</button>
+                        <div class="card">
+                            <h2>Сканиране на QR код</h2>
+                            <div class="scan-section">
+                                <p>Сканирайте QR код на инцидент с камерата на телефона</p>
+                                <div class="camera-container">
+                                    <div id="camera-preview">
+                                        <p>Камерата ще се активира при натискане на бутона</p>
+                                    </div>
+                                    <button id="startCamera" class="btn-success">Стартирай камерата</button>
+                                    <button id="stopCamera" class="btn-danger" style="display: none;">Спри камерата</button>
+                                </div>
+                                <div id="scanResult"></div>
+                            </div>
                         </div>
                         
-                        <div class="incident-list" id="incidentList">
-                            <div class="no-incidents">
-                                <i class="fas fa-inbox"></i>
-                                <h3>Все още няма докладвани инциденти</h3>
-                                <p>Добавете първия инцидент, за да започнете</p>
+                        <div class="card">
+                            <h2>Статистика</h2>
+                            <div class="stats-grid" id="stats">
+                                <div class="stat-item">
+                                    <div>Общо</div>
+                                    <div class="stat-value" id="total-incidents">0</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div>Нови</div>
+                                    <div class="stat-value" id="new-incidents">0</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div>В процес</div>
+                                    <div class="stat-value" id="in-progress-incidents">0</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div>Разрешени</div>
+                                    <div class="stat-value" id="resolved-incidents">0</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">
-                                <i class="fas fa-cog"></i> Управление на системата
-                            </h2>
-                        </div>
-                        <div class="data-management">
-                            <div class="data-actions">
-                                <button id="exportData" class="btn btn-outline">
-                                    <i class="fas fa-file-export"></i> Експортирай данни
-                                </button>
-                                <button id="importData" class="btn btn-outline">
-                                    <i class="fas fa-file-import"></i> Импортирай данни
-                                </button>
-                                <button id="clearData" class="btn btn-danger">
-                                    <i class="fas fa-trash-alt"></i> Изтрий всички данни
-                                </button>
+                    <div class="right-column">
+                        <div class="card">
+                            <h2>Списък с инциденти</h2>
+                            
+                            <div class="filters">
+                                <button class="filter-btn active" data-filter="all">Всички</button>
+                                <button class="filter-btn" data-filter="new">Нови</button>
+                                <button class="filter-btn" data-filter="in-progress">В процес</button>
+                                <button class="filter-btn" data-filter="resolved">Разрешени</button>
+                                <button class="filter-btn" data-filter="closed">Приключени</button>
                             </div>
+                            
+                            <div class="incident-list" id="incidentList">
+                                <div class="no-incidents">Все още няма докладвани инциденти</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h2>Системен лог</h2>
                             <div class="log-section">
-                                <h3>Системен лог</h3>
                                 <div id="systemLog"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h2>Управление на данни</h2>
+                            <div class="data-management">
+                                <div class="data-actions">
+                                    <button id="exportData" class="btn-info">Експортирай данни</button>
+                                    <button id="importData" class="btn-info">Импортирай данни</button>
+                                    <button id="clearData" class="btn-danger">Изтрий всички данни</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -844,80 +812,96 @@
     <!-- Mobile View for QR Scanning -->
     <div class="mobile-view" id="mobileView">
         <div class="mobile-header">
-            <div class="logo-icon" style="margin: 0 auto 15px;">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <h1>IRP Pro Mobile</h1>
+            <h1>IRP Система</h1>
             <p>Промяна на статус на инцидент</p>
         </div>
         
-        <div id="mobileIncidentInfo" class="mobile-incident-info" style="display: none;">
-            <h2>Информация за инцидента</h2>
-            <div id="mobileIncidentDetails"></div>
-        </div>
-        
-        <div id="mobileStatusForm" class="mobile-status-form" style="display: none;">
-            <h2>Промяна на статус</h2>
-            <p>Изберете нов статус:</p>
-            
-            <button class="status-btn status-new" data-status="new">
-                <span><i class="fas fa-plus-circle"></i> Нов</span>
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <button class="status-btn status-in-progress" data-status="in-progress">
-                <span><i class="fas fa-spinner"></i> В процес</span>
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <button class="status-btn status-resolved" data-status="resolved">
-                <span><i class="fas fa-check-circle"></i> Разрешен</span>
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <button class="status-btn status-closed" data-status="closed">
-                <span><i class="fas fa-archive"></i> Приключен</span>
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        
-        <div id="successMessage" class="success-message">
-            <i class="fas fa-check-circle"></i> Статусът е актуализиран успешно!
-        </div>
-        
-        <div id="errorMessage" class="error-message" style="display: none;">
-            <i class="fas fa-exclamation-triangle"></i> Грешка: Инцидентът не е намерен!
-        </div>
-        
-        <div class="manual-input">
-            <h3>Въведете ID на инцидент:</h3>
+        <div class="login-section">
+            <h2>Вход в системата</h2>
             <div class="form-group">
-                <input type="number" id="mobileIncidentId" placeholder="ID на инцидент от QR кода">
+                <input type="text" id="mobileLoginUsername" placeholder="Потребителско име">
             </div>
-            <button id="mobileLoadIncident" class="btn btn-success btn-block">
-                <i class="fas fa-search"></i> Зареди инцидент
-            </button>
+            <div class="form-group">
+                <input type="password" id="mobileLoginPassword" placeholder="Парола">
+            </div>
+            <button id="mobileLoginBtn" class="btn-success btn-block">Вход</button>
         </div>
         
-        <div id="mobileNoIncident" class="mobile-incident-info">
-            <h2>Няма избран инцидент</h2>
-            <p>Сканирайте QR код на инцидент или въведете ID ръчно, за да промените статуса му.</p>
-            <p>QR кодовете се генерират от десктоп версията на системата.</p>
+        <div id="mobileApp" style="display: none;">
+            <div class="user-info">
+                <span>Влезли сте като: <strong id="mobileCurrentUser"></strong></span>
+                <button id="mobileLogoutBtn" class="btn-danger">Изход</button>
+            </div>
+            
+            <div class="scan-section">
+                <h2>Сканиране на QR код</h2>
+                <div class="camera-container">
+                    <div id="mobileCameraPreview">
+                        <p>Камерата ще се активира при натискане на бутона</p>
+                    </div>
+                    <button id="mobileStartCamera" class="btn-success btn-block">Стартирай камерата</button>
+                    <button id="mobileStopCamera" class="btn-danger btn-block" style="display: none;">Спри камерата</button>
+                </div>
+                <div id="mobileScanResult"></div>
+            </div>
+            
+            <div id="mobileIncidentInfo" class="mobile-incident-info" style="display: none;">
+                <h2>Информация за инцидента</h2>
+                <div id="mobileIncidentDetails"></div>
+            </div>
+            
+            <div id="mobileStatusForm" class="mobile-status-form" style="display: none;">
+                <h2>Промяна на статус</h2>
+                <p>Изберете нов статус:</p>
+                
+                <button class="status-btn status-new" data-status="new">Нов</button>
+                <button class="status-btn status-in-progress" data-status="in-progress">В процес</button>
+                <button class="status-btn status-resolved" data-status="resolved">Разрешен</button>
+                <button class="status-btn status-closed" data-status="closed">Приключен</button>
+            </div>
+            
+            <div id="successMessage" class="success-message">
+                Статусът е актуализиран успешно!
+            </div>
+            
+            <div id="errorMessage" class="error-message" style="display: none;">
+                Грешка: Инцидентът не е намерен!
+            </div>
         </div>
     </div>
 
     <script>
         // Инициализация на данните
         let incidents = JSON.parse(localStorage.getItem('irp-incidents')) || [];
+        let users = JSON.parse(localStorage.getItem('irp-users')) || [];
+        let systemLog = JSON.parse(localStorage.getItem('irp-systemLog')) || [];
+        let currentUser = null;
         let currentFilter = 'all';
         let selectedIncidentId = null;
-        let systemLog = JSON.parse(localStorage.getItem('irp-systemLog')) || [];
         let currentScannedIncident = null;
+        let stream = null;
+        let scannerActive = false;
+        
+        // Инициализация на потребителите по подразбиране
+        if (users.length === 0) {
+            users = [
+                { username: 'admin', password: 'admin123', role: 'admin' },
+                { username: 'operator', password: 'operator123', role: 'operator' },
+                { username: 'viewer', password: 'viewer123', role: 'viewer' }
+            ];
+            localStorage.setItem('irp-users', JSON.stringify(users));
+        }
         
         // Функция за записване на лог
-        function addLogEntry(message) {
+        function addLogEntry(action, details, user = null) {
             const timestamp = new Date().toLocaleString('bg-BG');
-            systemLog.unshift({ timestamp, message });
-            // Запазваме само последните 50 записа
-            if (systemLog.length > 50) {
-                systemLog = systemLog.slice(0, 50);
+            const logUser = user || (currentUser ? currentUser.username : 'Система');
+            const entry = { timestamp, user: logUser, action, details };
+            
+            systemLog.unshift(entry);
+            // Запазваме само последните 100 записа
+            if (systemLog.length > 100) {
+                systemLog = systemLog.slice(0, 100);
             }
             localStorage.setItem('irp-systemLog', JSON.stringify(systemLog));
             updateLogDisplay();
@@ -933,10 +917,7 @@
             systemLog.forEach(entry => {
                 const logEntry = document.createElement('div');
                 logEntry.className = 'log-entry';
-                logEntry.innerHTML = `
-                    <div class="log-time">${entry.timestamp}</div>
-                    <div class="log-message">${entry.message}</div>
-                `;
+                logEntry.innerHTML = `<strong>${entry.timestamp}</strong> [${entry.user}]: ${entry.action} - ${entry.details}`;
                 logContainer.appendChild(logEntry);
             });
         }
@@ -945,7 +926,6 @@
         function saveIncidents() {
             localStorage.setItem('irp-incidents', JSON.stringify(incidents));
             updateStats();
-            addLogEntry(`Данните са запазени. Общо инциденти: ${incidents.length}`);
         }
         
         // Функция за обновяване на статистиката
@@ -954,12 +934,6 @@
             document.getElementById('new-incidents').textContent = incidents.filter(i => i.status === 'new').length;
             document.getElementById('in-progress-incidents').textContent = incidents.filter(i => i.status === 'in-progress').length;
             document.getElementById('resolved-incidents').textContent = incidents.filter(i => i.status === 'resolved').length;
-            
-            // Обновяване на брояча в заглавието
-            const incidentCount = document.getElementById('incidentCount');
-            if (incidentCount) {
-                incidentCount.textContent = `${incidents.length} инцидента`;
-            }
         }
         
         // Функция за показване на инцидентите
@@ -974,13 +948,7 @@
             }
             
             if (filteredIncidents.length === 0) {
-                incidentList.innerHTML = `
-                    <div class="no-incidents">
-                        <i class="fas fa-search"></i>
-                        <h3>Няма инциденти, отговарящи на избрания филтър</h3>
-                        <p>Опитайте с друг филтър или добавете нов инцидент</p>
-                    </div>
-                `;
+                incidentList.innerHTML = '<div class="no-incidents">Няма инциденти, отговарящи на избрания филтър</div>';
                 return;
             }
             
@@ -992,47 +960,30 @@
                 incidentElement.className = `incident-item ${isSelected ? 'selected' : ''}`;
                 incidentElement.innerHTML = `
                     <div class="incident-header">
-                        <div>
-                            <div class="incident-title">${incident.title}</div>
-                            <div class="incident-date">${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
-                        </div>
-                        <span class="priority-badge priority-${incident.priority}">${getPriorityText(incident.priority)}</span>
+                        <div class="incident-title">${incident.title}</div>
+                        <div class="incident-date">${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
                     </div>
                     <div class="incident-description">${incident.description}</div>
                     <div class="incident-footer">
                         <div>
-                            <span class="status-badge status-${incident.status}">
-                                <i class="fas ${getStatusIcon(incident.status)}"></i> ${getStatusText(incident.status)}
-                            </span>
-                            <span style="margin-left: 10px; font-size: 12px;">ID: ${incident.id}</span>
+                            <span class="status-badge status-${incident.status}">${getStatusText(incident.status)}</span>
+                            <span style="margin-left: 10px; font-size: 12px;">Приоритет: ${getPriorityText(incident.priority)}</span>
                         </div>
                         <div class="actions">
-                            <button class="action-btn ${isSelected ? 'btn-success' : 'btn-outline'}" onclick="selectIncident(${incident.id})">
-                                ${isSelected ? '<i class="fas fa-check"></i> Избран' : '<i class="fas fa-qrcode"></i> Избери'}
+                            <button class="action-btn ${isSelected ? 'btn-success' : ''}" onclick="selectIncident(${incident.id})">
+                                ${isSelected ? '✓ Избран' : 'Избери'}
                             </button>
-                            ${incident.status === 'new' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'in-progress\')"><i class="fas fa-play"></i> Започни</button>' : ''}
-                            ${incident.status === 'in-progress' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'resolved\')"><i class="fas fa-check"></i> Разреши</button>' : ''}
-                            ${incident.status === 'resolved' ? '<button class="action-btn btn-warning" onclick="updateStatus(' + incident.id + ', \'closed\')"><i class="fas fa-archive"></i> Приключи</button>' : ''}
-                            <button class="action-btn btn-danger" onclick="deleteIncident(${incident.id})"><i class="fas fa-trash"></i> Изтрий</button>
+                            ${incident.status === 'new' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'in-progress\')">Започни</button>' : ''}
+                            ${incident.status === 'in-progress' ? '<button class="action-btn btn-success" onclick="updateStatus(' + incident.id + ', \'resolved\')">Разреши</button>' : ''}
+                            ${incident.status === 'resolved' ? '<button class="action-btn" onclick="updateStatus(' + incident.id + ', \'closed\')">Приключи</button>' : ''}
+                            <button class="action-btn btn-danger" onclick="deleteIncident(${incident.id})">Изтрий</button>
                         </div>
                     </div>
-                    <div style="margin-top: 10px; font-size: 12px; color: #6c757d;">
-                        <i class="fas fa-user"></i> Докладчик: ${incident.reporter}
-                    </div>
+                    <div style="margin-top: 5px; font-size: 12px;">Докладчик: ${incident.reporter}</div>
+                    <div style="margin-top: 5px; font-size: 12px; font-weight: bold;">ID: ${incident.id}</div>
                 `;
                 incidentList.appendChild(incidentElement);
             });
-        }
-        
-        // Функция за получаване на икона за статуса
-        function getStatusIcon(status) {
-            const iconMap = {
-                'new': 'fa-plus-circle',
-                'in-progress': 'fa-spinner',
-                'resolved': 'fa-check-circle',
-                'closed': 'fa-archive'
-            };
-            return iconMap[status] || 'fa-circle';
         }
         
         // Функция за получаване на текста за статуса
@@ -1066,19 +1017,19 @@
                 reporter,
                 priority,
                 status: 'new',
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                createdBy: currentUser.username
             };
             
             incidents.push(newIncident);
             saveIncidents();
             displayIncidents();
-            addLogEntry(`Добавен е нов инцидент: "${title}" от ${reporter}`);
+            addLogEntry('Създаване на инцидент', `Инцидент "${title}" е създаден от ${currentUser.username}`);
             
             // Автоматично избиране на новия инцидент
             selectIncident(newIncident.id);
             
-            // Показване на съобщение за успех
-            showNotification(`Инцидентът "${title}" е добавен успешно!`, 'success');
+            alert(`Инцидентът "${title}" е добавен успешно!`);
         }
         
         // Функция за обновяване на статуса на инцидент
@@ -1087,9 +1038,11 @@
             if (incidentIndex !== -1) {
                 const oldStatus = incidents[incidentIndex].status;
                 incidents[incidentIndex].status = newStatus;
+                incidents[incidentIndex].updatedBy = currentUser.username;
+                incidents[incidentIndex].updatedAt = new Date().toISOString();
                 saveIncidents();
                 displayIncidents();
-                addLogEntry(`Инцидент #${id} е променен от "${getStatusText(oldStatus)}" на "${getStatusText(newStatus)}"`);
+                addLogEntry('Промяна на статус', `Инцидент #${id} е променен от "${getStatusText(oldStatus)}" на "${getStatusText(newStatus)}"`);
                 
                 // Ако инцидентът е избран, обновяваме QR кода
                 if (selectedIncidentId === id) {
@@ -1110,15 +1063,12 @@
                     incidents = incidents.filter(incident => incident.id !== id);
                     saveIncidents();
                     displayIncidents();
-                    addLogEntry(`Инцидент #${id} "${incidentTitle}" е изтрит`);
+                    addLogEntry('Изтриване на инцидент', `Инцидент #${id} "${incidentTitle}" е изтрит от ${currentUser.username}`);
                     
                     // Ако изтрития инцидент е бил избран, скриваме QR секцията
                     if (selectedIncidentId === id) {
                         resetQRCodeSection();
                     }
-                    
-                    // Показване на съобщение за успех
-                    showNotification(`Инцидентът "${incidentTitle}" е изтрит успешно!`, 'success');
                 }
             }
         }
@@ -1129,7 +1079,6 @@
             displayIncidents();
             updateSelectedIncidentInfo();
             showGenerateQRButton();
-            addLogEntry(`Инцидент #${id} е избран за генериране на QR код`);
         }
         
         // Функция за обновяване на информацията за избрания инцидент
@@ -1140,17 +1089,11 @@
             const detailsContainer = document.getElementById('selectedIncidentDetails');
             if (detailsContainer) {
                 detailsContainer.innerHTML = `
-                    <div style="margin-bottom: 10px;"><strong>${incident.title}</strong></div>
-                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
-                        <span class="status-badge status-${incident.status}">
-                            <i class="fas ${getStatusIcon(incident.status)}"></i> ${getStatusText(incident.status)}
-                        </span>
-                        <span class="priority-badge priority-${incident.priority}">
-                            ${getPriorityText(incident.priority)}
-                        </span>
-                    </div>
+                    <div><strong>${incident.title}</strong></div>
+                    <div>Статус: ${getStatusText(incident.status)}</div>
+                    <div>Приоритет: ${getPriorityText(incident.priority)}</div>
                     <div>Докладчик: ${incident.reporter}</div>
-                    <div style="margin-top: 5px; font-weight: bold;">ID: ${incident.id}</div>
+                    <div><strong>ID: ${incident.id}</strong></div>
                 `;
                 
                 document.getElementById('selectedIncidentInfo').style.display = 'block';
@@ -1178,7 +1121,7 @@
         // Функция за генериране на QR код
         function generateQRCode() {
             if (!selectedIncidentId) {
-                showNotification('Моля, изберете първо инцидент от списъка!', 'error');
+                alert('Моля, изберете първо инцидент от списъка!');
                 return;
             }
             
@@ -1203,7 +1146,7 @@
                 // Създаваме canvas елемент
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                const size = 200;
+                const size = 180;
                 canvas.width = size;
                 canvas.height = size;
                 
@@ -1236,11 +1179,10 @@
                 document.getElementById('qrCodeContainer').style.display = 'inline-block';
                 document.getElementById('qrActionButtons').style.display = 'flex';
                 
-                addLogEntry(`Генериран е QR код за инцидент #${incident.id}`);
-                showNotification(`QR код за инцидент #${incident.id} е генериран успешно!`, 'success');
+                addLogEntry('Генериране на QR код', `QR код за инцидент #${incident.id} е генериран`);
             } catch (error) {
                 console.error('Грешка при генериране на QR код:', error);
-                showNotification('Грешка при генериране на QR код!', 'error');
+                alert('Грешка при генериране на QR код!');
             }
         }
         
@@ -1248,7 +1190,7 @@
         function downloadQRCode() {
             const canvas = document.querySelector('#qrcode canvas');
             if (!canvas) {
-                showNotification('Няма генериран QR код за сваляне', 'error');
+                alert('Няма генериран QR код за сваляне');
                 return;
             }
             
@@ -1259,15 +1201,14 @@
             link.download = `incident-${incident.id}-${incident.title.replace(/\s+/g, '-')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            addLogEntry(`QR код за инцидент #${incident.id} е изтеглен`);
-            showNotification(`QR кодът е изтеглен успешно!`, 'success');
+            addLogEntry('Изтегляне на QR код', `QR код за инцидент #${incident.id} е изтеглен`);
         }
         
         // Функция за принтиране на QR кода
         function printQRCode() {
             const canvas = document.querySelector('#qrcode canvas');
             if (!canvas) {
-                showNotification('Няма генериран QR код за принтиране', 'error');
+                alert('Няма генериран QR код за принтиране');
                 return;
             }
             
@@ -1282,19 +1223,17 @@
                         <style>
                             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
                             h1 { color: #2c3e50; }
-                            .info { margin: 20px 0; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
-                            .info div { margin-bottom: 8px; }
+                            .info { margin: 20px 0; }
                             img { max-width: 100%; height: auto; }
                         </style>
                     </head>
                     <body>
                         <h1>Инцидент: ${incident.title}</h1>
                         <div class="info">
-                            <div><strong>Статус:</strong> ${getStatusText(incident.status)}</div>
-                            <div><strong>Приоритет:</strong> ${getPriorityText(incident.priority)}</div>
-                            <div><strong>Докладчик:</strong> ${incident.reporter}</div>
-                            <div><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
-                            <div><strong>ID:</strong> ${incident.id}</div>
+                            <p><strong>Статус:</strong> ${getStatusText(incident.status)}</p>
+                            <p><strong>Приоритет:</strong> ${getPriorityText(incident.priority)}</p>
+                            <p><strong>Докладчик:</strong> ${incident.reporter}</p>
+                            <p><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</p>
                         </div>
                         <img src="${canvas.toDataURL('image/png')}" alt="QR Code">
                         <script>
@@ -1307,7 +1246,7 @@
                 </html>
             `);
             printWindow.document.close();
-            addLogEntry(`QR код за инцидент #${incident.id} е принтиран`);
+            addLogEntry('Принтиране на QR код', `QR код за инцидент #${incident.id} е принтиран`);
         }
         
         // Функция за експорт на данни
@@ -1319,8 +1258,7 @@
             link.download = 'irp-system-data.json';
             link.href = URL.createObjectURL(dataBlob);
             link.click();
-            addLogEntry('Данните са експортирани във файл');
-            showNotification('Данните са експортирани успешно!', 'success');
+            addLogEntry('Експорт на данни', 'Данните са експортирани във файл');
         }
         
         // Функция за импорт на данни
@@ -1340,13 +1278,13 @@
                             incidents = importedData;
                             saveIncidents();
                             displayIncidents();
-                            addLogEntry(`Данните са импортирани успешно. Добавени са ${importedData.length} инцидента`);
-                            showNotification(`Данните са импортирани успешно! Добавени са ${importedData.length} инцидента`, 'success');
+                            addLogEntry('Импорт на данни', `Данните са импортирани успешно. Добавени са ${importedData.length} инцидента`);
+                            alert(`Данните са импортирани успешно! Добавени са ${importedData.length} инцидента`);
                         } else {
-                            showNotification('Невалиден формат на файла', 'error');
+                            alert('Невалиден формат на файла');
                         }
                     } catch (error) {
-                        showNotification('Грешка при прочитане на файла: ' + error.message, 'error');
+                        alert('Грешка при прочитане на файла: ' + error.message);
                     }
                 };
                 
@@ -1367,8 +1305,8 @@
                 displayIncidents();
                 updateLogDisplay();
                 resetQRCodeSection();
-                addLogEntry('Всички данни са изтрити');
-                showNotification('Всички данни са изтрити успешно!', 'success');
+                addLogEntry('Изтриване на данни', 'Всички данни са изтрити');
+                alert('Всички данни са изтрити успешно!');
             }
         }
         
@@ -1380,7 +1318,6 @@
             document.getElementById('errorMessage').style.display = 'none';
             
             if (!incident) {
-                document.getElementById('mobileNoIncident').style.display = 'block';
                 document.getElementById('mobileIncidentInfo').style.display = 'none';
                 document.getElementById('mobileStatusForm').style.display = 'none';
                 
@@ -1393,22 +1330,15 @@
             // Показваме информацията за инцидента
             const detailsContainer = document.getElementById('mobileIncidentDetails');
             detailsContainer.innerHTML = `
-                <div style="margin-bottom: 15px;"><strong>Заглавие:</strong> ${incident.title}</div>
-                <div style="margin-bottom: 15px;"><strong>Описание:</strong> ${incident.description}</div>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <span class="status-badge status-${incident.status}">
-                        <i class="fas ${getStatusIcon(incident.status)}"></i> ${getStatusText(incident.status)}
-                    </span>
-                    <span class="priority-badge priority-${incident.priority}">
-                        ${getPriorityText(incident.priority)}
-                    </span>
-                </div>
-                <div style="margin-bottom: 5px;"><strong>Докладчик:</strong> ${incident.reporter}</div>
-                <div style="margin-bottom: 5px;"><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
-                <div style="font-weight: bold;"><strong>ID:</strong> ${incident.id}</div>
+                <div><strong>Заглавие:</strong> ${incident.title}</div>
+                <div><strong>Описание:</strong> ${incident.description}</div>
+                <div><strong>Докладчик:</strong> ${incident.reporter}</div>
+                <div><strong>Приоритет:</strong> ${getPriorityText(incident.priority)}</div>
+                <div><strong>Текущ статус:</strong> <span class="status-badge status-${incident.status}">${getStatusText(incident.status)}</span></div>
+                <div><strong>Дата:</strong> ${new Date(incident.date).toLocaleDateString('bg-BG')}</div>
+                <div><strong>ID:</strong> ${incident.id}</div>
             `;
             
-            document.getElementById('mobileNoIncident').style.display = 'none';
             document.getElementById('mobileIncidentInfo').style.display = 'block';
             document.getElementById('mobileStatusForm').style.display = 'block';
             
@@ -1426,7 +1356,7 @@
                 // Показваме съобщение за успех
                 const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'block';
-                successMessage.innerHTML = `<i class="fas fa-check-circle"></i> Статусът е променен на: ${getStatusText(newStatus)}`;
+                successMessage.textContent = `Статусът е променен на: ${getStatusText(newStatus)}`;
                 
                 // Скриваме съобщението след 3 секунди
                 setTimeout(() => {
@@ -1435,69 +1365,224 @@
                 
                 // Обновяваме информацията за инцидента
                 showMobileIncidentView(currentScannedIncident.id);
+                
+                // Добавяме запис в лога
+                addLogEntry('Промяна на статус (мобилно)', `Инцидент #${currentScannedIncident.id} е променен на "${getStatusText(newStatus)}"`);
             }
         }
         
-        // Функция за обработка на сканиране на QR код
-        function processQRScan(incidentId) {
-            // Проверяваме дали сме на мобилно устройство
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // Функция за сканиране на QR код с камерата
+        function startCameraScanning(isMobile = false) {
+            const cameraPreview = isMobile ? 
+                document.getElementById('mobileCameraPreview') : 
+                document.getElementById('camera-preview');
+            const startBtn = isMobile ? 
+                document.getElementById('mobileStartCamera') : 
+                document.getElementById('startCamera');
+            const stopBtn = isMobile ? 
+                document.getElementById('mobileStopCamera') : 
+                document.getElementById('stopCamera');
+            const scanResult = isMobile ? 
+                document.getElementById('mobileScanResult') : 
+                document.getElementById('scanResult');
+            
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                scanResult.innerHTML = '<p style="color: red;">Вашият браузър не поддържа достъп до камерата</p>';
+                return;
+            }
+            
+            // Изчистваме preview контейнера
+            cameraPreview.innerHTML = '<video id="camera-video" autoplay playsinline></video>';
+            const video = cameraPreview.querySelector('#camera-video');
+            
+            // Стартираме камерата
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(function(mediaStream) {
+                    stream = mediaStream;
+                    video.srcObject = stream;
+                    scannerActive = true;
+                    
+                    startBtn.style.display = 'none';
+                    stopBtn.style.display = 'inline-block';
+                    scanResult.innerHTML = '<p>Сканирайте QR код...</p>';
+                    
+                    // Започваме сканирането
+                    scanQRCode(video, scanResult, isMobile);
+                })
+                .catch(function(error) {
+                    console.error('Грешка при достъп до камерата:', error);
+                    scanResult.innerHTML = '<p style="color: red;">Грешка при достъп до камерата: ' + error.message + '</p>';
+                });
+        }
+        
+        // Функция за сканиране на QR код
+        function scanQRCode(video, resultElement, isMobile) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            function tick() {
+                if (!scannerActive) return;
+                
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    if (code) {
+                        // Намерен е QR код
+                        const qrData = code.data;
+                        
+                        // Проверяваме дали данните съдържат ID на инцидент
+                        const match = qrData.match(/IRP-INCIDENT-(\d+)/);
+                        if (match) {
+                            const incidentId = parseInt(match[1]);
+                            resultElement.innerHTML = `<p style="color: green;">QR кодът е сканиран успешно! Инцидент ID: ${incidentId}</p>`;
+                            
+                            // Спираме сканирането
+                            stopCameraScanning(isMobile);
+                            
+                            // Показваме информацията за инцидента
+                            if (isMobile) {
+                                showMobileIncidentView(incidentId);
+                                addLogEntry('Сканиране на QR код (мобилно)', `Инцидент #${incidentId} е сканиран от ${currentUser.username}`);
+                            } else {
+                                selectIncident(incidentId);
+                                addLogEntry('Сканиране на QR код', `Инцидент #${incidentId} е сканиран от ${currentUser.username}`);
+                            }
+                            
+                            return;
+                        } else {
+                            resultElement.innerHTML = `<p style="color: orange;">QR кодът не съдържа валиден инцидент</p>`;
+                        }
+                    }
+                }
+                
+                requestAnimationFrame(tick);
+            }
+            
+            tick();
+        }
+        
+        // Функция за спиране на камерата
+        function stopCameraScanning(isMobile = false) {
+            scannerActive = false;
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            const startBtn = isMobile ? 
+                document.getElementById('mobileStartCamera') : 
+                document.getElementById('startCamera');
+            const stopBtn = isMobile ? 
+                document.getElementById('mobileStopCamera') : 
+                document.getElementById('stopCamera');
+            const cameraPreview = isMobile ? 
+                document.getElementById('mobileCameraPreview') : 
+                document.getElementById('camera-preview');
+            const scanResult = isMobile ? 
+                document.getElementById('mobileScanResult') : 
+                document.getElementById('scanResult');
+            
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            cameraPreview.innerHTML = '<p>Камерата ще се активира при натискане на бутона</p>';
+            scanResult.innerHTML = '';
+        }
+        
+        // Функция за управление на потребителите
+        function displayUsers() {
+            const userList = document.getElementById('userList');
+            if (!userList) return;
+            
+            userList.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div>
+                        <strong>${user.username}</strong>
+                        <span class="user-badge user-${user.role}">${user.role}</span>
+                    </div>
+                    <div class="user-actions">
+                        <button class="action-btn btn-danger" onclick="deleteUser(${index})">Изтрий</button>
+                    </div>
+                `;
+                userList.appendChild(userItem);
+            });
+        }
+        
+        // Функция за добавяне на потребител
+        function addUser(username, password, role) {
+            if (users.find(u => u.username === username)) {
+                alert('Потребителското име вече съществува!');
+                return false;
+            }
+            
+            users.push({ username, password, role });
+            localStorage.setItem('irp-users', JSON.stringify(users));
+            displayUsers();
+            addLogEntry('Добавяне на потребител', `Потребител ${username} е добавен с роля ${role}`);
+            return true;
+        }
+        
+        // Функция за изтриване на потребител
+        function deleteUser(index) {
+            if (confirm('Сигурни ли сте, че искате да изтриете този потребител?')) {
+                const username = users[index].username;
+                users.splice(index, 1);
+                localStorage.setItem('irp-users', JSON.stringify(users));
+                displayUsers();
+                addLogEntry('Изтриване на потребител', `Потребител ${username} е изтрит`);
+            }
+        }
+        
+        // Функция за вход в системата
+        function login(username, password, isMobile = false) {
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                
+                if (isMobile) {
+                    document.getElementById('mobileApp').style.display = 'block';
+                    document.getElementById('mobileCurrentUser').textContent = currentUser.username;
+                    document.querySelector('.mobile-view .login-section').style.display = 'none';
+                } else {
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('currentUser').textContent = currentUser.username;
+                    document.getElementById('loginSection').style.display = 'none';
+                }
+                
+                addLogEntry('Вход в системата', `Потребител ${username} влезе в системата`);
+                return true;
+            } else {
+                alert('Грешно потребителско име или парола!');
+                return false;
+            }
+        }
+        
+        // Функция за изход от системата
+        function logout(isMobile = false) {
+            addLogEntry('Изход от системата', `Потребител ${currentUser.username} излезе от системата`);
+            currentUser = null;
             
             if (isMobile) {
-                // Показваме мобилния изглед
-                document.querySelector('.desktop-view').style.display = 'none';
-                document.getElementById('mobileView').style.display = 'block';
-                
-                // Показваме информацията за инцидента
-                showMobileIncidentView(incidentId);
-                addLogEntry(`Обработено сканиране на QR код за инцидент #${incidentId}`);
+                document.getElementById('mobileApp').style.display = 'none';
+                document.querySelector('.mobile-view .login-section').style.display = 'block';
+                document.getElementById('mobileLoginUsername').value = '';
+                document.getElementById('mobileLoginPassword').value = '';
             } else {
-                // На десктоп, просто зареждаме инцидента
-                const incident = incidents.find(i => i.id == incidentId);
-                if (incident) {
-                    selectIncident(incident.id);
-                    showNotification(`Инцидент #${incidentId} е зареден: ${incident.title}`, 'success');
-                } else {
-                    showNotification(`Инцидент с ID ${incidentId} не беше намерен!`, 'error');
-                }
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
             }
-        }
-        
-        // Функция за ръчно зареждане на инцидент по ID
-        function loadIncidentById(incidentId) {
-            const incident = incidents.find(i => i.id == incidentId);
-            if (incident) {
-                selectIncident(incident.id);
-                showNotification(`Инцидент #${incidentId} е зареден: ${incident.title}`, 'success');
-            } else {
-                showNotification(`Инцидент с ID ${incidentId} не беше намерен!`, 'error');
-            }
-        }
-        
-        // Функция за показване на известия
-        function showNotification(message, type) {
-            // Създаваме временно известие
-            const notification = document.createElement('div');
-            notification.className = `success-message ${type === 'error' ? 'error-message' : ''}`;
-            notification.innerHTML = `
-                <i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${message}
-            `;
-            notification.style.position = 'fixed';
-            notification.style.top = '20px';
-            notification.style.right = '20px';
-            notification.style.zIndex = '1000';
-            notification.style.maxWidth = '300px';
-            notification.style.animation = 'fadeIn 0.5s ease';
-            
-            document.body.appendChild(notification);
-            
-            // Премахваме известието след 3 секунди
-            setTimeout(() => {
-                notification.style.animation = 'fadeOut 0.5s ease';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 500);
-            }, 3000);
         }
         
         // Инициализация на приложението
@@ -1505,48 +1590,26 @@
             updateStats();
             displayIncidents();
             updateLogDisplay();
-            addLogEntry('Системата е стартирана');
+            displayUsers();
+            addLogEntry('Стартиране на системата', 'Системата е стартирана');
             
-            // Добавяме event listeners за бутоните в мобилния изглед
-            document.querySelectorAll('.status-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const newStatus = this.getAttribute('data-status');
-                    updateStatusFromMobile(newStatus);
-                });
-            });
+            // Проверяваме дали сме на мобилно устройство
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            // Добавяме event listener за ръчно зареждане на инцидент в мобилния изглед
-            document.getElementById('mobileLoadIncident').addEventListener('click', function() {
-                const incidentId = parseInt(document.getElementById('mobileIncidentId').value);
-                if (incidentId) {
-                    processQRScan(incidentId);
-                } else {
-                    showNotification('Моля, въведете ID на инцидент!', 'error');
-                }
-            });
-            
-            // Добавяме event listener за ръчно зареждане на инцидент в десктоп изгледа
-            document.getElementById('processScan').addEventListener('click', function() {
-                const incidentId = parseInt(document.getElementById('scanIncidentId').value);
-                if (incidentId) {
-                    processQRScan(incidentId);
-                } else {
-                    showNotification('Моля, въведете ID на инцидент от QR кода!', 'error');
-                }
-            });
-            
-            // Добавяме event listener за обновяване на данните
-            document.getElementById('refreshData').addEventListener('click', function() {
-                updateStats();
-                displayIncidents();
-                updateLogDisplay();
-                showNotification('Данните са обновени!', 'success');
-            });
+            if (isMobile) {
+                document.querySelector('.desktop-view').style.display = 'none';
+                document.getElementById('mobileView').style.display = 'block';
+            }
         }
         
         // Обработка на подаването на формуляра
         document.getElementById('incidentForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            if (!currentUser) {
+                alert('Моля, влезте в системата първо!');
+                return;
+            }
             
             const title = document.getElementById('title').value;
             const description = document.getElementById('description').value;
@@ -1576,6 +1639,74 @@
         document.getElementById('exportData').addEventListener('click', exportData);
         document.getElementById('importData').addEventListener('click', importData);
         document.getElementById('clearData').addEventListener('click', clearData);
+        document.getElementById('addUser').addEventListener('click', function() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('userRole').value;
+            
+            if (username && password) {
+                if (addUser(username, password, role)) {
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                }
+            } else {
+                alert('Моля, попълнете всички полета!');
+            }
+        });
+        
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (username && password) {
+                login(username, password);
+            } else {
+                alert('Моля, попълнете всички полета!');
+            }
+        });
+        
+        document.getElementById('mobileLoginBtn').addEventListener('click', function() {
+            const username = document.getElementById('mobileLoginUsername').value;
+            const password = document.getElementById('mobileLoginPassword').value;
+            
+            if (username && password) {
+                login(username, password, true);
+            } else {
+                alert('Моля, попълнете всички полета!');
+            }
+        });
+        
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            logout();
+        });
+        
+        document.getElementById('mobileLogoutBtn').addEventListener('click', function() {
+            logout(true);
+        });
+        
+        document.getElementById('startCamera').addEventListener('click', function() {
+            startCameraScanning();
+        });
+        
+        document.getElementById('stopCamera').addEventListener('click', function() {
+            stopCameraScanning();
+        });
+        
+        document.getElementById('mobileStartCamera').addEventListener('click', function() {
+            startCameraScanning(true);
+        });
+        
+        document.getElementById('mobileStopCamera').addEventListener('click', function() {
+            stopCameraScanning(true);
+        });
+        
+        // Добавяне на event listeners за бутоните в мобилния изглед
+        document.querySelectorAll('.status-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const newStatus = this.getAttribute('data-status');
+                updateStatusFromMobile(newStatus);
+            });
+        });
         
         // Стартиране на приложението
         initApp();
