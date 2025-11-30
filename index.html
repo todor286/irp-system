@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRP System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Навигация -->
+        <div class="nav-container">
+            <button class="nav-btn" onclick="showPage('page1')">Начало</button>
+            <button class="nav-btn" onclick="showPage('page2')">Форма</button>
+            <button class="nav-btn" onclick="showPage('page3')">Данни</button>
+            <button class="nav-btn" onclick="showPage('page4')">Настройки</button>
+        </div>
+
+        <!-- Страница 1: Начало -->
+        <div id="page1" class="page">
+            <h2>Добре дошли в IRP System</h2>
+            <p>Това е вашата система за управление. Използвайте бутоните по-горе за навигация.</p>
+            <div style="margin-top: 20px;">
+                <h3>Бързи действия:</h3>
+                <button class="nav-btn" onclick="showPage('page2')">Нова форма</button>
+                <button class="nav-btn" onclick="showPage('page3')">Преглед на данни</button>
+            </div>
+        </div>
+
+        <!-- Страница 2: Форма -->
+        <div id="page2" class="page">
+            <h2>Форма за въвеждане</h2>
+            <form id="mainForm">
+                <div class="form-group">
+                    <label for="name">Име:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Имейл:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">Отдел:</label>
+                    <select id="department" name="department">
+                        <option value="it">IT</option>
+                        <option value="hr">HR</option>
+                        <option value="finance">Финанси</option>
+                        <option value="marketing">Маркетинг</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Съобщение:</label>
+                    <textarea id="message" name="message" rows="4"></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Изпрати</button>
+            </form>
+        </div>
+
+        <!-- Страница 3: Данни -->
+        <div id="page3" class="page">
+            <h2>Преглед на данни</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Име</th>
+                        <th>Имейл</th>
+                        <th>Отдел</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Иван Иванов</td>
+                        <td>ivan@example.com</td>
+                        <td>IT</td>
+                        <td>Активен</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Мария Петрова</td>
+                        <td>maria@example.com</td>
+                        <td>HR</td>
+                        <td>Активен</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Петър Георгиев</td>
+                        <td>petar@example.com</td>
+                        <td>Финанси</td>
+                        <td>Неактивен</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Страница 4: Настройки -->
+        <div id="page4" class="page">
+            <h2>Настройки на системата</h2>
+            <div class="form-group">
+                <label for="theme">Тема:</label>
+                <select id="theme" name="theme">
+                    <option value="light">Светла</option>
+                    <option value="dark">Тъмна</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="language">Език:</label>
+                <select id="language" name="language">
+                    <option value="bg">Български</option>
+                    <option value="en">Английски</option>
+                </select>
+            </div>
+            
+            <button class="submit-btn">Запази настройките</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
