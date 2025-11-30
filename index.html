@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система за отчитане на работа</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         * {
@@ -544,6 +544,8 @@
         let materials = JSON.parse(localStorage.getItem('materials')) || [];
         let reports = JSON.parse(localStorage.getItem('reports')) || [];
         let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentTaskForQR = null;
+        let currentMaterialForQR = null;
         
         // DOM елементи
         const authButtons = document.getElementById('authButtons');
@@ -564,6 +566,17 @@
             loadMaterials();
             loadReports();
             loadRecentReports();
+            
+            // Възстановяване на последните QR кодове
+            if (tasks.length > 0) {
+                currentTaskForQR = tasks[tasks.length - 1];
+                generateTaskQRCode();
+            }
+            
+            if (materials.length > 0) {
+                currentMaterialForQR = materials[materials.length - 1];
+                generateMaterialQRCode();
+            }
         });
         
         // Функции за навигация
@@ -580,6 +593,8 @@
             // Специални действия за определени страници
             if (pageId === 'tasks') {
                 generateTaskQRCode();
+            } else if (pageId === 'materials') {
+                generateMaterialQRCode();
             } else if (pageId === 'scan') {
                 // Няма да стартираме автоматично сканирането
             }
@@ -638,6 +653,7 @@
             
             tasks.push(task);
             localStorage.setItem('tasks', JSON.stringify(tasks));
+            currentTaskForQR = task;
             
             return task;
         }
@@ -668,18 +684,23 @@
             const qrCodeDiv = document.getElementById('qrCode');
             qrCodeDiv.innerHTML = '';
             
-            if (tasks.length > 0) {
-                const lastTask = tasks[tasks.length - 1];
+            if (currentTaskForQR) {
                 const qrData = JSON.stringify({
                     type: 'task',
-                    id: lastTask.id,
-                    name: lastTask.name
+                    id: currentTaskForQR.id,
+                    name: currentTaskForQR.name
                 });
                 
-                QRCode.toCanvas(qrData, { width: 200, height: 200 }, function(err, canvas) {
-                    if (err) console.error(err);
-                    qrCodeDiv.appendChild(canvas);
-                });
+                // Генериране на QR код с новата библиотека
+                const qr = qrcode(0, 'M');
+                qr.addData(qrData);
+                qr.make();
+                
+                const qrImage = qr.createImgTag(5, 0);
+                qrCodeDiv.innerHTML = qrImage;
+            } else if (tasks.length > 0) {
+                currentTaskForQR = tasks[tasks.length - 1];
+                generateTaskQRCode();
             } else {
                 qrCodeDiv.innerHTML = '<p>Няма създадени задачи. Създайте задача, за да генерирате QR код.</p>';
             }
@@ -698,6 +719,7 @@
             
             materials.push(material);
             localStorage.setItem('materials', JSON.stringify(materials));
+            currentMaterialForQR = material;
             
             return material;
         }
@@ -726,18 +748,23 @@
             const qrCodeDiv = document.getElementById('materialQrCode');
             qrCodeDiv.innerHTML = '';
             
-            if (materials.length > 0) {
-                const lastMaterial = materials[materials.length - 1];
+            if (currentMaterialForQR) {
                 const qrData = JSON.stringify({
                     type: 'material',
-                    id: lastMaterial.id,
-                    name: lastMaterial.name
+                    id: currentMaterialForQR.id,
+                    name: currentMaterialForQR.name
                 });
                 
-                QRCode.toCanvas(qrData, { width: 200, height: 200 }, function(err, canvas) {
-                    if (err) console.error(err);
-                    qrCodeDiv.appendChild(canvas);
-                });
+                // Генериране на QR код с новата библиотека
+                const qr = qrcode(0, 'M');
+                qr.addData(qrData);
+                qr.make();
+                
+                const qrImage = qr.createImgTag(5, 0);
+                qrCodeDiv.innerHTML = qrImage;
+            } else if (materials.length > 0) {
+                currentMaterialForQR = materials[materials.length - 1];
+                generateMaterialQRCode();
             } else {
                 qrCodeDiv.innerHTML = '<p>Няма създадени материали. Създайте материал, за да генерирате QR код.</p>';
             }
