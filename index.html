@@ -166,6 +166,14 @@
             background: #d35400;
         }
         
+        .btn-info {
+            background: #17a2b8;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
         .qr-container {
             text-align: center;
             margin: 20px 0;
@@ -325,6 +333,13 @@
             margin-top: 10px;
         }
         
+        .data-management {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -352,6 +367,10 @@
             .task-actions {
                 flex-direction: column;
             }
+            
+            .data-management {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -366,6 +385,7 @@
                     <li><a href="#" onclick="showPage('materials')">Материали</a></li>
                     <li><a href="#" onclick="showPage('reports')">Отчитания</a></li>
                     <li><a href="#" onclick="showPage('scan')">Сканиране</a></li>
+                    <li><a href="#" onclick="showPage('sync')">Синхронизация</a></li>
                 </ul>
             </nav>
             <div class="auth-buttons" id="authButtons">
@@ -416,6 +436,14 @@
                         <!-- Данните ще се попълнят от JavaScript -->
                     </tbody>
                 </table>
+            </div>
+
+            <div class="card">
+                <h2>Синхронизация на данни</h2>
+                <p>За да споделяте данни между различни устройства, използвайте опциите за експорт и импорт на данни.</p>
+                <div class="data-management">
+                    <button class="btn-info" onclick="showPage('sync')">Управление на данните</button>
+                </div>
             </div>
         </div>
 
@@ -590,15 +618,45 @@
                 </div>
             </div>
         </div>
+
+        <!-- Синхронизация -->
+        <div id="sync" class="page">
+            <div class="card">
+                <h2>Синхронизация на данни</h2>
+                <p>Използвайте тези опции за да споделяте данни между различни устройства.</p>
+                
+                <div class="data-management">
+                    <button class="btn-success" onclick="exportData()">Експортирай всички данни</button>
+                    <button class="btn-warning" onclick="document.getElementById('importFile').click()">Импортирай данни</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                    <button class="btn-info" onclick="generateDataQR()">Генерирай QR код с данни</button>
+                    <button class="btn-danger" onclick="clearAllData()">Изтрий всички данни</button>
+                </div>
+                
+                <div id="dataQRCode" class="qr-container" style="display: none; margin-top: 20px;">
+                    <h3>QR код с данните</h3>
+                    <p>Сканирайте този QR код на друго устройство за да импортирате данните</p>
+                </div>
+                
+                <div id="syncResult" style="margin-top: 20px;"></div>
+            </div>
+            
+            <div class="card">
+                <h2>Статистика</h2>
+                <div id="stats">
+                    <!-- Статистиката ще се покаже тук -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         // Данни за приложението
         let currentUser = null;
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        let materials = JSON.parse(localStorage.getItem('materials')) || [];
-        let reports = JSON.parse(localStorage.getItem('reports')) || [];
-        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let tasks = [];
+        let materials = [];
+        let reports = [];
+        let users = [];
         let currentTaskForQR = null;
         let currentMaterialForQR = null;
         
@@ -610,17 +668,34 @@
         
         // Проверка за текущ потребител при зареждане
         document.addEventListener('DOMContentLoaded', function() {
+            // Зареждане на всички данни от localStorage
+            loadAllData();
+            
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 updateUI();
+                
+                // Автоматично зареждане на данните при логнат потребител
+                refreshAllData();
             }
-            
-            // Инициализация на данни
+        });
+        
+        // Функция за зареждане на всички данни от localStorage
+        function loadAllData() {
+            tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            materials = JSON.parse(localStorage.getItem('materials')) || [];
+            reports = JSON.parse(localStorage.getItem('reports')) || [];
+            users = JSON.parse(localStorage.getItem('users')) || [];
+        }
+        
+        // Функция за обновяване на всички данни в интерфейса
+        function refreshAllData() {
             loadTasks();
             loadMaterials();
             loadReports();
             loadRecentReports();
+            loadStats();
             
             // Възстановяване на последните QR кодове
             if (tasks.length > 0) {
@@ -632,7 +707,7 @@
                 currentMaterialForQR = materials[materials.length - 1];
                 generateMaterialQRCode();
             }
-        });
+        }
         
         // Функции за навигация
         function showPage(pageId) {
@@ -644,6 +719,11 @@
             
             // Показване на избраната страница
             document.getElementById(pageId).classList.add('active');
+            
+            // Специални действия за определени страници
+            if (pageId === 'sync') {
+                loadStats();
+            }
         }
         
         // Функции за потребители
@@ -715,9 +795,7 @@
                 reports = reports.filter(report => report.itemId !== taskId);
                 localStorage.setItem('reports', JSON.stringify(reports));
                 
-                loadTasks();
-                loadReports();
-                loadRecentReports();
+                refreshAllData();
                 
                 // Актуализиране на QR кода
                 if (currentTaskForQR && currentTaskForQR.id === taskId) {
@@ -733,13 +811,12 @@
                 if (task) {
                     task.completed = false;
                     localStorage.setItem('tasks', JSON.stringify(tasks));
-                    loadTasks();
                     
                     // Премахване на отчетите за тази задача
                     reports = reports.filter(report => report.itemId !== taskId);
                     localStorage.setItem('reports', JSON.stringify(reports));
-                    loadReports();
-                    loadRecentReports();
+                    
+                    refreshAllData();
                 }
             }
         }
@@ -749,11 +826,12 @@
             if (task) {
                 task.completed = true;
                 localStorage.setItem('tasks', JSON.stringify(tasks));
-                loadTasks();
                 
                 // Създаване на отчет за задачата
                 if (currentUser) {
                     createReport(taskId, 'task', task.name);
+                } else {
+                    refreshAllData();
                 }
             }
         }
@@ -885,9 +963,7 @@
                 reports = reports.filter(report => report.itemId !== materialId);
                 localStorage.setItem('reports', JSON.stringify(reports));
                 
-                loadMaterials();
-                loadReports();
-                loadRecentReports();
+                refreshAllData();
                 
                 // Актуализиране на QR кода
                 if (currentMaterialForQR && currentMaterialForQR.id === materialId) {
@@ -903,13 +979,12 @@
                 if (material) {
                     material.used = false;
                     localStorage.setItem('materials', JSON.stringify(materials));
-                    loadMaterials();
                     
                     // Премахване на отчетите за този материал
                     reports = reports.filter(report => report.itemId !== materialId);
                     localStorage.setItem('reports', JSON.stringify(reports));
-                    loadReports();
-                    loadRecentReports();
+                    
+                    refreshAllData();
                 }
             }
         }
@@ -1012,20 +1087,17 @@
                 if (task) {
                     task.completed = true;
                     localStorage.setItem('tasks', JSON.stringify(tasks));
-                    loadTasks();
                 }
             } else if (itemType === 'material') {
                 const material = materials.find(m => m.id === itemId);
                 if (material) {
                     material.used = true;
                     localStorage.setItem('materials', JSON.stringify(materials));
-                    loadMaterials();
                 }
             }
             
             // Презареждане на списъците
-            loadReports();
-            loadRecentReports();
+            refreshAllData();
             
             return report;
         }
@@ -1034,8 +1106,7 @@
             if (confirm('Сигурни ли сте, че искате да изтриете ВСИЧКИ отчети? Това действие не може да бъде отменено!')) {
                 reports = [];
                 localStorage.setItem('reports', JSON.stringify(reports));
-                loadReports();
-                loadRecentReports();
+                refreshAllData();
             }
         }
         
@@ -1088,6 +1159,132 @@
                 
                 recentReports.appendChild(row);
             });
+        }
+        
+        // Функции за синхронизация
+        function exportData() {
+            const data = {
+                tasks: tasks,
+                materials: materials,
+                reports: reports,
+                users: users,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `worktrack_data_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            document.getElementById('syncResult').innerHTML = '<div class="success">Данните са експортирани успешно!</div>';
+        }
+        
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('Сигурни ли сте, че искате да импортирате тези данни? Това ще презапише текущите данни.')) {
+                        if (data.tasks) {
+                            tasks = data.tasks;
+                            localStorage.setItem('tasks', JSON.stringify(tasks));
+                        }
+                        if (data.materials) {
+                            materials = data.materials;
+                            localStorage.setItem('materials', JSON.stringify(materials));
+                        }
+                        if (data.reports) {
+                            reports = data.reports;
+                            localStorage.setItem('reports', JSON.stringify(reports));
+                        }
+                        if (data.users) {
+                            users = data.users;
+                            localStorage.setItem('users', JSON.stringify(users));
+                        }
+                        
+                        document.getElementById('syncResult').innerHTML = '<div class="success">Данните са импортирани успешно!</div>';
+                        
+                        // Презареждане на всички данни
+                        refreshAllData();
+                    }
+                } catch (error) {
+                    document.getElementById('syncResult').innerHTML = '<div class="error">Грешка при импортиране на данните: ' + error.message + '</div>';
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function generateDataQR() {
+            const data = {
+                tasks: tasks,
+                materials: materials,
+                reports: reports,
+                users: users,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data);
+            const qrCodeDiv = document.getElementById('dataQRCode');
+            qrCodeDiv.style.display = 'block';
+            qrCodeDiv.innerHTML = '<h3>QR код с данните</h3><p>Сканирайте този QR код на друго устройство за да импортирате данните</p>';
+            
+            // Генериране на QR код
+            const typeNumber = 0;
+            const errorCorrectionLevel = 'L';
+            const qr = qrcode(typeNumber, errorCorrectionLevel);
+            qr.addData(dataStr);
+            qr.make();
+            
+            // Създаване на изображение
+            const qrImage = qr.createDataURL(10, 0);
+            const img = document.createElement('img');
+            img.src = qrImage;
+            img.alt = 'QR код с данните на системата';
+            img.style.width = '300px';
+            img.style.height = '300px';
+            qrCodeDiv.appendChild(img);
+            
+            document.getElementById('syncResult').innerHTML = '<div class="success">QR код с данните е генериран. Сканирайте го с друго устройство.</div>';
+        }
+        
+        function clearAllData() {
+            if (confirm('СИГУРНИ ЛИ СТЕ? Това ще изтрие ВСИЧКИ данни - задачи, материали, отчети и потребители! Това действие не може да бъде отменено!')) {
+                localStorage.clear();
+                loadAllData();
+                currentUser = null;
+                
+                document.getElementById('syncResult').innerHTML = '<div class="success">Всички данни са изтрити!</div>';
+                
+                // Презареждане на всички данни
+                refreshAllData();
+                updateUI();
+            }
+        }
+        
+        function loadStats() {
+            const statsDiv = document.getElementById('stats');
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const usedMaterials = materials.filter(material => material.used).length;
+            
+            statsDiv.innerHTML = `
+                <p><strong>Общо задачи:</strong> ${tasks.length}</p>
+                <p><strong>Завършени задачи:</strong> ${completedTasks}</p>
+                <p><strong>Общо материали:</strong> ${materials.length}</p>
+                <p><strong>Използвани материали:</strong> ${usedMaterials}</p>
+                <p><strong>Общо отчети:</strong> ${reports.length}</p>
+                <p><strong>Регистрирани потребители:</strong> ${users.length}</p>
+            `;
         }
         
         // Функции за сканиране
@@ -1165,6 +1362,50 @@
         
         function processScannedQRCode(qrData) {
             try {
+                // Проверка дали е QR код с данни
+                if (qrData.includes('"tasks":') && qrData.includes('"materials":')) {
+                    // Това е QR код с данни за импорт
+                    if (confirm('Открит е QR код с данни. Искате ли да импортирате тези данни?')) {
+                        const data = JSON.parse(qrData);
+                        
+                        if (data.tasks) {
+                            tasks = data.tasks;
+                            localStorage.setItem('tasks', JSON.stringify(tasks));
+                        }
+                        if (data.materials) {
+                            materials = data.materials;
+                            localStorage.setItem('materials', JSON.stringify(materials));
+                        }
+                        if (data.reports) {
+                            reports = data.reports;
+                            localStorage.setItem('reports', JSON.stringify(reports));
+                        }
+                        if (data.users) {
+                            users = data.users;
+                            localStorage.setItem('users', JSON.stringify(users));
+                        }
+                        
+                        document.getElementById('scanResult').innerHTML = `
+                            <div class="success">
+                                <h3>Данните са импортирани успешно!</h3>
+                                <p><strong>Задачи:</strong> ${data.tasks ? data.tasks.length : 0}</p>
+                                <p><strong>Материали:</strong> ${data.materials ? data.materials.length : 0}</p>
+                                <p><strong>Отчети:</strong> ${data.reports ? data.reports.length : 0}</p>
+                            </div>
+                        `;
+                        
+                        // Презареждане на всички данни
+                        refreshAllData();
+                        
+                        // Спиране на сканирането
+                        setTimeout(() => {
+                            stopScanning();
+                            showPage('home');
+                        }, 3000);
+                        return;
+                    }
+                }
+                
                 // Опитваме се да обработим QR кода като прост текст формат
                 if (qrData.includes('TASK:') || qrData.includes('MATERIAL:')) {
                     const parts = qrData.split(':');
@@ -1201,10 +1442,6 @@
                                 <p><strong>Дата:</strong> ${new Date().toLocaleString('bg-BG')}</p>
                             </div>
                         `;
-                        
-                        // Презареждане на списъците
-                        loadTasks();
-                        loadMaterials();
                         
                         // Автоматично прехвърляне към отчетите след 2 секунди
                         setTimeout(() => {
@@ -1247,10 +1484,6 @@
                             </div>
                         `;
                         
-                        // Презареждане на списъците
-                        loadTasks();
-                        loadMaterials();
-                        
                         // Автоматично прехвърляне към отчетите след 2 секунди
                         setTimeout(() => {
                             stopScanning();
@@ -1282,6 +1515,10 @@
                 currentUser = user;
                 localStorage.setItem('currentUser', JSON.stringify(user));
                 updateUI();
+                
+                // Автоматично зареждане на данните след успешен вход
+                refreshAllData();
+                
                 showPage('home');
                 
                 document.getElementById('loginForm').reset();
@@ -1307,6 +1544,10 @@
             currentUser = user;
             localStorage.setItem('currentUser', JSON.stringify(user));
             updateUI();
+            
+            // Автоматично зареждане на данните след успешна регистрация
+            refreshAllData();
+            
             showPage('home');
             
             document.getElementById('registerForm').reset();
@@ -1326,8 +1567,7 @@
             const materialsList = document.getElementById('taskMaterials').value;
             
             createTask(name, description, materialsList);
-            loadTasks();
-            generateTaskQRCode();
+            refreshAllData();
             
             document.getElementById('taskForm').reset();
         });
@@ -1346,12 +1586,10 @@
             const description = document.getElementById('materialDescription').value;
             
             createMaterial(name, quantity, description);
-            loadMaterials();
-            generateMaterialQRCode();
+            refreshAllData();
             
             document.getElementById('materialForm').reset();
         });
     </script>
 </body>
 </html>
-
